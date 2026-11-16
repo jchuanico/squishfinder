@@ -133,6 +133,7 @@ p.sub{color:var(--soft);font-size:1.15rem;margin:.2em 0 1em}
 
 .foot{max-width:900px;margin:0 auto;padding:10px 16px 30px;text-align:center;color:var(--soft);font-size:.85rem}
 .foot p{margin:4px 0}
+.foot a,.note a{color:inherit}
 
 @media (max-width:640px){
   .detail{grid-template-columns:1fr}
