@@ -1,0 +1,24 @@
+/* Extra styles for squish profile pages (loaded after ../style.css) */
+a{color:#d9568a}
+.logo,.chip{text-decoration:none;color:inherit}
+.logo{color:var(--pink)}
+main.page{max-width:900px;margin:0 auto;padding:8px 16px 32px}
+.crumbs{font-size:.9rem;color:var(--soft);margin:4px 0 10px}
+.crumbs a{color:var(--soft)}
+.detail h1{font-size:clamp(1.8rem,5vw,2.4rem);margin:.2em 0 .3em}
+.panel{background:var(--card);border-radius:24px;padding:16px 18px;box-shadow:var(--shadow);margin-top:18px}
+.panel h2{font-size:1.35rem;margin:.1em 0 .4em}
+.panel h3{font-size:1.1rem;margin:1em 0 .2em}
+.panel p,.panel li{line-height:1.5}
+.traits{width:100%;border-collapse:collapse;margin:6px 0 12px}
+.traits th,.traits td{text-align:left;padding:7px 10px;border-bottom:2px dashed var(--line);vertical-align:top}
+.traits th{width:38%;color:var(--soft);font-weight:700}
+.notes{padding-left:20px;margin:6px 0}
+.pick{background:#fff7e0;border-radius:16px;padding:10px 14px;margin-top:12px;line-height:1.45}
+a.card{text-decoration:none;color:inherit}
+a.card .note{line-height:1.25;margin-top:2px}
+.sources{margin-top:18px;line-height:1.6}
+.sources a{color:var(--soft)}
+@media (max-width:640px){ .traits th{width:42%} .panel{padding:14px}
+  .logo{white-space:nowrap} .top .chip{padding:6px 10px;font-size:.85rem;white-space:nowrap} }
+@media (max-width:420px){ .top-actions .chip:first-child{display:none} }
