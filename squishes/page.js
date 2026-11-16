@@ -24,6 +24,7 @@
       var p = document.createElement("p");
       p.className = "follow";
       p.innerHTML = '🎬 Follow Squish Finder: <a href="https://www.tiktok.com/@squishfinder22" target="_blank" rel="me noopener">TikTok</a> · ' +
+        '<a href="https://www.instagram.com/squishfinder22/" target="_blank" rel="me noopener">Instagram</a> · ' +
         '<a href="https://www.youtube.com/@squishfinder22" target="_blank" rel="me noopener">YouTube Shorts</a>';
       foot.insertBefore(p, foot.firstChild);
     }
