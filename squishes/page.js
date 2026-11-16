@@ -18,6 +18,16 @@
       track(src ? ["visit", "src_" + src] : "visit");
     }
   } catch (e) {}
+  try {
+    var foot = document.querySelector(".foot");
+    if (foot) {
+      var p = document.createElement("p");
+      p.className = "follow";
+      p.innerHTML = '🎬 Follow Squish Finder: <a href="https://www.tiktok.com/@squishfinder22" target="_blank" rel="me noopener">TikTok</a> · ' +
+        '<a href="https://www.youtube.com/@squishfinder22" target="_blank" rel="me noopener">YouTube Shorts</a>';
+      foot.insertBefore(p, foot.firstChild);
+    }
+  } catch (e) {}
   document.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("a[data-buy]");
     if (a) track(["buy_" + a.dataset.buy, "buy_" + a.dataset.id]);
