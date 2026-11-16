@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://squishfinder.ca/</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <url><loc>https://squishfinder.ca/</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/archie-the-axolotl</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/avery-the-mallard</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/benny-the-bigfoot</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/cam-the-cat</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/claudia-the-beet</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/connor-the-cow</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/danny-the-dinosaur</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/fifi-the-fox</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/gordon-the-shark</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/hans-the-hedgehog</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/leonard-the-lion</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/lola-the-unicorn</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/malcolm-the-mushroom</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/maui-the-pineapple</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/stacy-the-squid</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/sunny-the-bee</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/wendy-the-frog</loc><lastmod>2026-11-16</lastmod></url>
+  <url><loc>https://squishfinder.ca/squishes/winston-the-owl</loc><lastmod>2026-11-16</lastmod></url>
 </urlset>
