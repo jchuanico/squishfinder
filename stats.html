@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Squish Finder stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fff4fa;--card:#fff;--ink:#4a3b5c;--soft:#8a7a9c;--pink:#ff7fae;--purple:#a37bff;--line:#f1def0}
+  *{box-sizing:border-box} body{margin:0;font-family:"Baloo 2",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  main{max-width:900px;margin:0 auto;padding:16px}
+  h1{margin:.2em 0;color:var(--pink)} h2{font-size:1.2rem;margin:1.2em 0 .4em}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .tabs button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:6px 14px;background:var(--card);color:var(--ink);cursor:pointer;box-shadow:0 2px 0 var(--line)}
+  .tabs button.on{background:var(--pink);color:#fff}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .tile{background:var(--card);border-radius:18px;padding:12px;box-shadow:0 3px 0 var(--line)}
+  .tile b{display:block;font-size:1.8rem;line-height:1.1} .tile span{color:var(--soft);font-size:.9rem}
+  .tile i{font-style:normal;color:var(--purple);font-weight:700;font-size:.85rem}
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden}
+  th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);font-size:.95rem} th{background:#fdf0f7}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}
+  .bar{height:10px;background:linear-gradient(90deg,var(--pink),var(--purple));border-radius:99px;min-width:2px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .note{color:var(--soft);font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+  <h1>🧸 Squish Finder stats</h1>
+  <p class="note" id="status">Loading…</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="tiles" id="tiles"></div>
+  <div class="grid2">
+    <section><h2>Where visitors came from</h2><table id="src"></table></section>
+    <section><h2>Buy clicks by store</h2><table id="stores"></table></section>
+  </div>
+  <div class="grid2">
+    <section><h2>Most picked squishes</h2><table id="picks"></table></section>
+    <section><h2>Most Buy clicks by squish</h2><table id="buys"></table></section>
+  </div>
+  <section><h2>Day by day</h2><table id="daily"></table></section>
+  <p class="note">Counts are anonymous (no cookies, no personal data). A "visit" is one browser session. Buy clicks are clicks on an Amazon button, not purchases: check Amazon Associates reports for sales. Days are Toronto time.</p>
+</main>
+<script src="data.js"></script>
+<script>
+(function () {
+  var names = {}; SQUISHES.forEach(function (s) { names[s.id] = s.name; });
+  var data = {}, range = 7;
+  function sum(keys) {
+    var out = {}, days = Object.keys(data).sort().reverse().slice(0, range);
+    days.forEach(function (d) { var o = data[d]; for (var k in o) out[k] = (out[k] || 0) + o[k]; });
+    return out;
+  }
+  function pct(a, b) { return b ? Math.round(a / b * 100) + "%" : "–"; }
+  function table(el, rows, head) {
+    var max = Math.max.apply(null, rows.map(function (r) { return r[1]; }).concat([1]));
+    document.getElementById(el).innerHTML = "<tr><th>" + head + "</th><th></th><th class='n'>Count</th></tr>" +
+      (rows.length ? rows.map(function (r) { return "<tr><td>" + r[0] + "</td><td style='width:40%'><div class='bar' style='width:" + (r[1] / max * 100) + "%'></div></td><td class='n'>" + r[1] + "</td></tr>"; }).join("")
+        : "<tr><td colspan=3 class='note'>Nothing yet</td></tr>");
+  }
+  function prefixed(t, p, label) {
+    return Object.keys(t).filter(function (k) { return k.indexOf(p) === 0; })
+      .map(function (k) { var id = k.slice(p.length); return [label ? label(id) : id, t[k]]; })
+      .filter(function (r) { return r[0]; }).sort(function (a, b) { return b[1] - a[1]; });
+  }
+  function draw() {
+    var t = sum(), v = t.visit || 0, st = t.start || 0, dn = t.done || 0, pk = 0, by = (t.buy_ca || 0) + (t.buy_com || 0);
+    Object.keys(t).forEach(function (k) { if (k.indexOf("pick_") === 0) pk += t[k]; });
+    var tiles = [["Visits", v, ""], ["Quiz starts", st, pct(st, v) + " of visits"], ["Quiz finished", dn, pct(dn, st) + " of starts"],
+                 ["Squish picked", pk, pct(pk, dn) + " of finishes"], ["Buy clicks", by, pct(by, v) + " of visits"],
+                 ["Gift quizzes", t.start_gift || 0, pct(t.start_gift || 0, st) + " of starts"], ["Shares", (t.share || 0) + (t.invite || 0), ""]];
+    document.getElementById("tiles").innerHTML = tiles.map(function (x) { return "<div class='tile'><span>" + x[0] + "</span><b>" + x[1] + "</b><i>" + x[2] + "</i></div>"; }).join("");
+    table("src", prefixed(t, "src_", function (s) { return s.charAt(0).toUpperCase() + s.slice(1); }), "Source");
+    table("stores", [["🇨🇦 Amazon.ca", t.buy_ca || 0], ["🇺🇸 Amazon.com", t.buy_com || 0]], "Store");
+    table("picks", prefixed(t, "pick_", function (id) { return names[id]; }).slice(0, 10), "Squish");
+    table("buys", prefixed(t, "buy_", function (id) { return names[id]; }).slice(0, 10), "Squish");
+    var days = Object.keys(data).sort().reverse().slice(0, range);
+    document.getElementById("daily").innerHTML = "<tr><th>Day</th><th class='n'>Visits</th><th class='n'>Starts</th><th class='n'>Finished</th><th class='n'>Buy clicks</th></tr>" +
+      (days.length ? days.map(function (d) { var o = data[d]; return "<tr><td>" + d + "</td><td class='n'>" + (o.visit || 0) + "</td><td class='n'>" + (o.start || 0) + "</td><td class='n'>" + (o.done || 0) + "</td><td class='n'>" + ((o.buy_ca || 0) + (o.buy_com || 0)) + "</td></tr>"; }).join("")
+        : "<tr><td colspan=5 class='note'>Nothing yet</td></tr>");
+  }
+  var tabs = [[1, "Today"], [7, "7 days"], [30, "30 days"], [90, "90 days"]];
+  document.getElementById("tabs").innerHTML = tabs.map(function (x) { return "<button data-r='" + x[0] + "'" + (x[0] === range ? " class='on'" : "") + ">" + x[1] + "</button>"; }).join("");
+  document.getElementById("tabs").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return; range = +b.dataset.r;
+    [].forEach.call(this.children, function (c) { c.classList.toggle("on", c === b); }); draw();
+  });
+  fetch(CONFIG.voteEndpoint + "?stats=1&days=90").then(function (r) { return r.json(); }).then(function (j) {
+    data = j.days || {}; delete data.test;
+    Object.keys(data).forEach(function (d) { delete data[d].test; });
+    document.getElementById("status").textContent = "Updated " + new Date().toLocaleString() + ". Refresh for the latest numbers.";
+    draw();
+  }).catch(function () { document.getElementById("status").textContent = "Couldn't load stats. Try refreshing."; });
+})();
+</script>
+</body>
+</html>
