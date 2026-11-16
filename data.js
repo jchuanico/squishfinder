@@ -11,7 +11,7 @@ window.CONFIG = {
 };
 
 /* ============ SQUISH DATABASE ============
-   All 18 confirmed with plush listings on Amazon.ca (Nov 2026). Bios are fan-written. */
+   All 24 confirmed with plush listings on Amazon.ca (Nov 2026). Bios are fan-written. */
 window.SQUISHES = [
   { id: "cam", name: "Cam the Cat", type: "cat", body: "#f3e6d6", belly: "#fffaf3", accent: "#ffb3c6",
     spots: [[52,84,20,15,"#b5793f"],[146,72,15,11,"#3a2e2e"],[150,152,18,13,"#3a2e2e"],[58,150,14,10,"#b5793f"]],
@@ -67,49 +67,69 @@ window.SQUISHES = [
     bio: "Leonard is a gentle lion with a big fluffy mane. He looks like a king, but his favorite thing is a long nap in the warm sun." },
   { id: "claudia", name: "Claudia the Beet", type: "beet", body: "#a8378f", belly: null, accent: "#ff8fc8", ink: "#2b1630",
     squad: "Veggie Squad", fav: "Gardens & headbands",
-    bio: "Claudia is a stylish purple beet who never leaves the garden without her pink headband. She's calm, kind, and always rooting for her friends." }
+    bio: "Claudia is a stylish purple beet who never leaves the garden without her pink headband. She's calm, kind, and always rooting for her friends." },
+  { id: "olma", name: "Olma the Strawberry Cat", type: "cat", body: "#ff9fb4", belly: "#ffe3ea", accent: "#ff6f93", leaf: "#4caf50",
+    spots: [[62,96,3,5,"#fff1b3"],[138,96,3,5,"#fff1b3"],[46,128,3,5,"#fff1b3"],[154,128,3,5,"#fff1b3"],[80,70,3,5,"#fff1b3"],[120,70,3,5,"#fff1b3"]],
+    squad: "Snack Squad", fav: "Berry picking & naps",
+    bio: "Olma is a sweet strawberry cat with a leafy green top. She loves berry picking, all things pink, and curling up for long afternoon naps." },
+  { id: "noelani", name: "Noelani the Teal Axolotl", type: "axolotl", body: "#7fd6cf", belly: "#d9f6f2", accent: "#ff9fc8", wings: "#e9e2ff",
+    squad: "Magic Squad", fav: "Lagoon splashes & stargazing",
+    bio: "Noelani is a dreamy teal axolotl with tiny wings. She splashes around the lagoon by day and flutters up to visit the stars at night." },
+  { id: "marcella", name: "Marcella the Watermelon Octopus", type: "squid", body: "#ff8fa3", belly: "#ffe0e6", accent: "#5cbf6a", fin: false,
+    spots: [[70,86,3,5,"#2b2235"],[130,86,3,5,"#2b2235"],[52,120,3,5,"#2b2235"],[148,120,3,5,"#2b2235"],[100,66,3,5,"#2b2235"]],
+    squad: "Sea Squad", fav: "Summer picnics",
+    bio: "Marcella is a juicy watermelon octopus who lives for summer picnics. With eight arms, she can hand out snacks to everyone at once!" },
+  { id: "simon", name: "Simon the Orange Sloth", type: "sloth", body: "#e8a35c", belly: "#f6dcb8", accent: "#c98a4e",
+    squad: "Safari Squad", fav: "Hammock naps",
+    bio: "Simon is an easygoing orange sloth who never rushes anything. His favorite things are hammock naps, slow snacks, and very long hugs." },
+  { id: "reginald", name: "Reginald the Corgi", type: "dog", body: "#f0a04b", belly: "#ffffff", accent: "#d93b3b",
+    squad: "Pup Pack", fav: "Walks & belly rubs",
+    bio: "Reginald is a proud corgi in a red bandana. He trots everywhere with his tail wagging and never misses a walk, a treat, or a belly rub." },
+  { id: "glady", name: "Glady the Rainbow Ice Cream", type: "icecream", body: "#ffd1e8", belly: null, accent: "#ff4f7b",
+    squad: "Snack Squad", fav: "Sprinkles & parties",
+    bio: "Glady is a rainbow ice cream scoop and the life of every party. She sprinkles joy wherever she goes and never melts under pressure." }
 ];
 
 /* ============ 6 QUESTIONS ============ */
 window.QUESTIONS = [
   { q: "Pick a color vibe!", g: "What colors do they love?", mascot: "lola", a: [
-    { t: "Pink & purple", e: "💗", p: ["archie", "lola", "stacy", "claudia"] },
+    { t: "Pink & purple", e: "💗", p: ["archie", "lola", "stacy", "claudia", "olma", "marcella", "glady"] },
     { t: "Green & leafy", e: "🌿", p: ["wendy", "danny", "avery"] },
-    { t: "Blues & teals", e: "💙", p: ["winston", "gordon"] },
-    { t: "Warm orange & red", e: "🧡", p: ["fifi", "malcolm", "leonard"] },
+    { t: "Blues & teals", e: "💙", p: ["winston", "gordon", "noelani"] },
+    { t: "Warm orange & red", e: "🧡", p: ["fifi", "malcolm", "leonard", "simon", "reginald"] },
     { t: "Sunny yellow", e: "💛", p: ["sunny", "maui", "leonard"] },
     { t: "Browns, black & white", e: "🤎", p: ["connor", "cam", "hans", "benny"] } ] },
   { q: "Where would you rather hang out?", g: "Where would they rather hang out?", mascot: "wendy", a: [
-    { t: "Cozy couch", e: "🛋️", p: ["cam", "hans"] },
+    { t: "Cozy couch", e: "🛋️", p: ["cam", "hans", "simon"] },
     { t: "Enchanted forest", e: "🌲", p: ["malcolm", "fifi", "lola", "benny"] },
-    { t: "Pond or ocean", e: "🌊", p: ["wendy", "archie", "gordon", "stacy", "avery"] },
-    { t: "Farm or garden", e: "🌻", p: ["connor", "sunny", "claudia"] },
-    { t: "Jungle or beach", e: "🏝️", p: ["maui", "leonard", "danny"] },
-    { t: "Under the stars", e: "🌙", p: ["winston", "benny"] } ] },
+    { t: "Pond or ocean", e: "🌊", p: ["wendy", "archie", "gordon", "stacy", "avery", "marcella"] },
+    { t: "Farm or garden", e: "🌻", p: ["connor", "sunny", "claudia", "olma", "reginald"] },
+    { t: "Jungle or beach", e: "🏝️", p: ["maui", "leonard", "danny", "simon", "glady"] },
+    { t: "Under the stars", e: "🌙", p: ["winston", "benny", "noelani"] } ] },
   { q: "Choose a snack!", g: "What's their go-to snack?", mascot: "maui", a: [
-    { t: "Fresh fruit", e: "🍓", p: ["maui", "archie", "avery"] },
-    { t: "Cookies & milk", e: "🍪", p: ["cam", "connor", "hans"] },
+    { t: "Fresh fruit", e: "🍓", p: ["maui", "archie", "avery", "olma", "marcella"] },
+    { t: "Cookies & milk", e: "🍪", p: ["cam", "connor", "hans", "reginald"] },
     { t: "Crunchy veggies", e: "🥕", p: ["wendy", "malcolm", "claudia"] },
     { t: "Pizza", e: "🍕", p: ["gordon", "fifi", "leonard", "danny"] },
-    { t: "Cupcakes & honey", e: "🍯", p: ["lola", "sunny", "stacy"] },
-    { t: "Movie popcorn", e: "🍿", p: ["winston", "benny"] } ] },
+    { t: "Cupcakes & honey", e: "🍯", p: ["lola", "sunny", "stacy", "glady", "noelani"] },
+    { t: "Movie popcorn", e: "🍿", p: ["winston", "benny", "simon"] } ] },
   { q: "Which one sounds most like you?", g: "Which one sounds most like them?", mascot: "fifi", a: [
-    { t: "Shy & sweet", e: "🥺", p: ["hans", "malcolm", "cam", "stacy"] },
-    { t: "Silly & goofy", e: "🤪", p: ["wendy", "maui", "archie", "avery"] },
-    { t: "Brave & bold", e: "💪", p: ["gordon", "leonard", "fifi", "danny"] },
-    { t: "Calm & chill", e: "😌", p: ["connor", "cam", "claudia"] },
-    { t: "Dreamy & creative", e: "🎨", p: ["lola", "winston", "sunny"] },
-    { t: "Curious explorer", e: "🔎", p: ["fifi", "benny", "wendy"] } ] },
+    { t: "Shy & sweet", e: "🥺", p: ["hans", "malcolm", "cam", "stacy", "olma"] },
+    { t: "Silly & goofy", e: "🤪", p: ["wendy", "maui", "archie", "avery", "glady"] },
+    { t: "Brave & bold", e: "💪", p: ["gordon", "leonard", "fifi", "danny", "reginald"] },
+    { t: "Calm & chill", e: "😌", p: ["connor", "cam", "claudia", "simon"] },
+    { t: "Dreamy & creative", e: "🎨", p: ["lola", "winston", "sunny", "noelani"] },
+    { t: "Curious explorer", e: "🔎", p: ["fifi", "benny", "wendy", "marcella"] } ] },
   { q: "Favorite season?", g: "What's their favorite season?", mascot: "hans", a: [
-    { t: "Spring", e: "🌷", p: ["wendy", "lola", "archie", "sunny", "claudia"] },
-    { t: "Summer", e: "☀️", p: ["maui", "gordon", "connor", "stacy", "leonard"] },
-    { t: "Fall", e: "🍂", p: ["fifi", "hans", "malcolm", "benny"] },
-    { t: "Winter", e: "❄️", p: ["cam", "winston", "avery", "danny"] } ] },
+    { t: "Spring", e: "🌷", p: ["wendy", "lola", "archie", "sunny", "claudia", "olma"] },
+    { t: "Summer", e: "☀️", p: ["maui", "gordon", "connor", "stacy", "leonard", "marcella", "glady", "simon"] },
+    { t: "Fall", e: "🍂", p: ["fifi", "hans", "malcolm", "benny", "reginald"] },
+    { t: "Winter", e: "❄️", p: ["cam", "winston", "avery", "danny", "noelani"] } ] },
   { q: "What kind of squish do you want to hug?", g: "What kind of squish would they love?", mascot: "cam", a: [
-    { t: "A furry animal friend", e: "🐾", p: ["cam", "connor", "fifi", "hans", "leonard"] },
-    { t: "Something magical", e: "✨", p: ["lola", "winston"] },
-    { t: "Something yummy or leafy", e: "🍄", p: ["maui", "malcolm", "claudia"] },
-    { t: "A water buddy", e: "💧", p: ["wendy", "archie", "gordon", "stacy", "avery"] },
+    { t: "A furry animal friend", e: "🐾", p: ["cam", "connor", "fifi", "hans", "leonard", "simon", "reginald", "olma"] },
+    { t: "Something magical", e: "✨", p: ["lola", "winston", "noelani"] },
+    { t: "Something yummy or leafy", e: "🍄", p: ["maui", "malcolm", "claudia", "glady"] },
+    { t: "A water buddy", e: "💧", p: ["wendy", "archie", "gordon", "stacy", "avery", "marcella"] },
     { t: "A buzzy little bug", e: "🐝", p: ["sunny"] },
     { t: "A dino or a legend", e: "🦖", p: ["danny", "benny"] } ] }
 ];
