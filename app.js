@@ -167,6 +167,26 @@
     window.scrollTo(0, 0);
   }
 
+  /* ---------------- anonymous counters (no cookies, no personal data: just +1 on a named event) ---------------- */
+  function track(ev) {
+    if (!CONFIG.voteEndpoint) return;
+    try {
+      fetch(CONFIG.voteEndpoint, { method: "POST", mode: "no-cors", keepalive: true, headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ ev: ev }) }).catch(function () {});
+    } catch (e) {}
+  }
+  function source(sharedId) {
+    var utm = (location.search.match(/[?&]utm_source=([a-z]+)/i) || [])[1], host = "";
+    try { host = new URL(document.referrer).hostname; } catch (e) {}
+    var known = { pinterest: /pinterest|pin\.it/, google: /google\./, bing: /bing\.|duckduckgo|yahoo/, reddit: /reddit/,
+                  facebook: /facebook|fb\.|messenger/, instagram: /instagram/, tiktok: /tiktok/ };
+    if (utm && known[utm.toLowerCase()]) return utm.toLowerCase();
+    for (var k in known) if (known[k].test(host)) return k;
+    if (sharedId) return "shared";
+    if (!host) return "direct";
+    return host === location.hostname ? null : "other";
+  }
+
   /* ---------------- sharing ---------------- */
   function toast(html, ms) {
     var old = document.querySelector(".toast"); if (old) old.remove();
@@ -226,6 +246,7 @@
     var maxPossible = QUESTIONS.length;
     confetti();
     var gift = mode === "gift";
+    track(gift ? ["done", "done_gift"] : "done");
     render('<div class="center"><h2>' + (gift ? "Top gift picks! 🎁" : "Your top squish matches! 🎉") + '</h2><p class="sub">' +
       (gift ? "Tap the one you think they'll love most." : "Tap the one that is <b>your</b> favorite.") + "</p></div>" +
       '<div class="cards">' + top.map(function (x, i) {
@@ -253,14 +274,15 @@
   function detail(id, shared) {
     var s = byId[id];
     if (!s) return home();
-    if (!shared) vote(id); // a shared link is someone else's pick, not a vote
+    if (!shared) { vote(id); track("pick_" + id); } // a shared link is someone else's pick, not a vote
     confetti();
     var gift = mode === "gift" && !shared;
     var badge = shared ? "Shared with you 💌" : gift ? "Great gift pick 🎁" : "Your favorite 💗";
     var shareBtns = '<div class="share-row"><button class="btn alt share" data-share="' + s.id + '">📤 ' + (gift ? "Share this pick" : "Share my result") + "</button>" +
       (gift ? '<button class="btn alt share" data-go="invite">🎁 Send them the quiz</button>' : "") + "</div>";
     var buttons = CONFIG.stores.map(function (st, i) {
-      return '<a class="btn buy' + (i ? " alt" : "") + '" target="_blank" rel="sponsored noopener" href="' + buyUrl(s, st) + '">' +
+      return '<a class="btn buy' + (i ? " alt" : "") + '" data-buy="' + (/\.ca$/.test(st.domain) ? "ca" : "com") + '" data-id="' + s.id +
+        '" target="_blank" rel="sponsored noopener" href="' + buyUrl(s, st) + '">' +
         st.flag + " Buy on " + st.name + "</a>";
     }).join("");
     render((shared ? '<div class="center shared-cta"><p class="sub">Someone shared this squish with you! Which one are <b>you</b>?</p>' +
@@ -395,6 +417,8 @@
 
   /* ---------------- events (one delegated listener) ---------------- */
   app.addEventListener("click", function (e) {
+    var buy = e.target.closest("a[data-buy]");
+    if (buy) { track(["buy_" + buy.dataset.buy, "buy_" + buy.dataset.id]); return; }
     var t = e.target.closest("button");
     if (!t) return;
     // browsers only allow audio after a tap: start music on first quiz start unless muted
@@ -413,18 +437,19 @@
     }
     if (t.dataset.fav) return detail(t.dataset.fav);
     if (t.dataset.share) {
+      track("share");
       var sh = byId[t.dataset.share];
       return share(mode === "gift" ? "I think " + sh.name + " is the perfect Squishmallow gift 🎁 Find your own match:" :
         "I got " + sh.name + "! 💗 Which Squishmallow are you? Take the 6-question quiz:", BASE + "?s=" + sh.id);
     }
-    if (t.dataset.who) { mode = t.dataset.who; step = 0; answers = []; return question(); }
+    if (t.dataset.who) { mode = t.dataset.who; step = 0; answers = []; track(mode === "gift" ? ["start", "start_gift"] : "start"); return question(); }
     switch (t.dataset.go) {
       case "start": who(); break;
       case "home": home(); break;
       case "back": if (step === 0) who(); else { step--; answers.length = step; question(); } break;
       case "all": all(); break;
       case "poll": poll(); break;
-      case "invite": share("Take this quick quiz so I know which Squishmallow to get you 🎁", BASE); break;
+      case "invite": track("invite"); share("Take this quick quiz so I know which Squishmallow to get you 🎁", BASE); break;
     }
   });
   document.getElementById("homeBtn").addEventListener("click", home);
@@ -435,5 +460,13 @@
 
   // a shared link (?s=wendy) opens that squish; anything else starts at home
   var sid = (location.search.match(/[?&]s=([a-z]+)/) || [])[1];
+  // count one visit per browser session, with where it came from
+  try {
+    if (!sessionStorage.getItem("sf_v")) {
+      sessionStorage.setItem("sf_v", "1");
+      var src = source(sid && byId[sid] ? sid : null);
+      track(src ? ["visit", "src_" + src] : "visit");
+    }
+  } catch (e) {}
   if (sid && byId[sid]) detail(sid, true); else home();
 })();
