@@ -496,8 +496,10 @@
     if (t.dataset.share) {
       track("share");
       var sh = byId[t.dataset.share];
+      // link to the squish's profile page so the preview shows that squish's own picture
+      var shareUrl = location.origin + "/squishes/" + sh.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "?from=share" + (mode === "gift" ? "&gift=1" : "");
       return share(mode === "gift" ? "I think " + sh.name + " is the perfect Squishmallow gift 🎁 Find your own match:" :
-        "I got " + sh.name + "! 💗 Which Squishmallow are you? Take the 6-question quiz:", BASE + "?s=" + sh.id);
+        "I got " + sh.name + "! 💗 Which Squishmallow are you? Take the 6-question quiz:", shareUrl);
     }
     if (t.dataset.who) { mode = t.dataset.who; step = 0; answers = []; track(mode === "gift" ? ["start", "start_gift"] : "start"); return question(); }
     switch (t.dataset.go) {
@@ -525,5 +527,8 @@
       track(src ? ["visit", "src_" + src] : "visit");
     }
   } catch (e) {}
-  if (sid && byId[sid]) detail(sid, true); else home();
+  // /?gift=1 (used by the gift guide) jumps straight into the gift quiz
+  if (sid && byId[sid]) detail(sid, true);
+  else if (/[?&]gift=1/.test(location.search)) { mode = "gift"; step = 0; answers = []; track(["start", "start_gift"]); question(); }
+  else home();
 })();
