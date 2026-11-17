@@ -1,0 +1,45 @@
+# Squish Finder
+
+> Squish Finder (squishfinder.ca) is a free, fan-made "Which Squishmallow are you?" personality quiz. Six quick questions about colors, snacks, seasons and vibe match you, or someone you're shopping for, to one of 24 Squishmallows. It also has a Squishmallow gift guide and a profile page for every squish with its bio, personality, collector and rarity notes, size tips and where to buy. Free, no sign-up. Not affiliated with Jazwares or Squishmallows.
+
+Updated: 2026-11-17
+
+## Main pages
+
+- [Which Squishmallow Are You? quiz](https://squishfinder.ca/): the 6-question personality quiz; choose "It's a gift" to find a Squishmallow for someone else
+- [Gift quiz](https://squishfinder.ca/?gift=1): starts the quiz in gift mode
+- [Squishmallow Gift Guide 2026](https://squishfinder.ca/squishmallow-gift-guide): gift picks by personality, favorite color and interest, plus which size to buy
+- [All Squishmallows](https://squishfinder.ca/squishes/): all 24 squishes with bios, squads and links to their profiles
+
+## Squish profiles
+
+- [Cam the Cat](https://squishfinder.ca/squishes/cam-the-cat)
+- [Wendy the Frog](https://squishfinder.ca/squishes/wendy-the-frog)
+- [Malcolm the Mushroom](https://squishfinder.ca/squishes/malcolm-the-mushroom)
+- [Archie the Axolotl](https://squishfinder.ca/squishes/archie-the-axolotl)
+- [Connor the Cow](https://squishfinder.ca/squishes/connor-the-cow)
+- [Fifi the Fox](https://squishfinder.ca/squishes/fifi-the-fox)
+- [Hans the Hedgehog](https://squishfinder.ca/squishes/hans-the-hedgehog)
+- [Winston the Owl](https://squishfinder.ca/squishes/winston-the-owl)
+- [Maui the Pineapple](https://squishfinder.ca/squishes/maui-the-pineapple)
+- [Lola the Unicorn](https://squishfinder.ca/squishes/lola-the-unicorn)
+- [Gordon the Shark](https://squishfinder.ca/squishes/gordon-the-shark)
+- [Benny the Bigfoot](https://squishfinder.ca/squishes/benny-the-bigfoot)
+- [Avery the Mallard](https://squishfinder.ca/squishes/avery-the-mallard)
+- [Stacy the Squid](https://squishfinder.ca/squishes/stacy-the-squid)
+- [Danny the Dinosaur](https://squishfinder.ca/squishes/danny-the-dinosaur)
+- [Sunny the Bee](https://squishfinder.ca/squishes/sunny-the-bee)
+- [Leonard the Lion](https://squishfinder.ca/squishes/leonard-the-lion)
+- [Claudia the Beet](https://squishfinder.ca/squishes/claudia-the-beet)
+- [Olma the Strawberry Cat](https://squishfinder.ca/squishes/olma-the-strawberry-cat)
+- [Noelani the Teal Axolotl](https://squishfinder.ca/squishes/noelani-the-teal-axolotl)
+- [Marcella the Watermelon Octopus](https://squishfinder.ca/squishes/marcella-the-watermelon-octopus)
+- [Simon the Sloth](https://squishfinder.ca/squishes/simon-the-sloth)
+- [Reginald the Corgi](https://squishfinder.ca/squishes/reginald-the-corgi)
+- [Glady the Rainbow Ice Cream](https://squishfinder.ca/squishes/glady-the-rainbow-ice-cream)
+
+## Quick facts
+
+- Squishmallows commonly come in 5", 8", 12", 16" and 24" sizes. 5" to 8" suits stockings and backpacks, 12" is the classic gift size, 16" to 24" is a huggable pillow.
+- Rare editions are marked on the tag: silver (Rare), gold (Ultra Rare) and black (Select Series), plus event exclusives such as Comic-Con editions.
+- Squish Finder's bios and illustrations are original fan work.

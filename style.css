@@ -158,6 +158,16 @@ p.sub{color:var(--soft);font-size:1.15rem;margin:.2em 0 1em}
 .foot .btn{color:#fff}
 .foot .btn.alt{color:var(--ink)}
 
+.home-faq{max-width:680px;margin:0 auto 26px;text-align:left}
+.home-faq h2{text-align:center}
+.home-faq details{background:var(--card);border-radius:20px;box-shadow:0 4px 0 var(--line);margin:0 0 10px;color:var(--ink);font-size:.98rem}
+.home-faq summary{cursor:pointer;list-style:none;font-weight:800;padding:12px 44px 12px 18px;position:relative}
+.home-faq summary::-webkit-details-marker{display:none}
+.home-faq summary::after{content:"+";position:absolute;right:14px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;
+  background:#fff0f7;color:var(--pink);font-weight:800;text-align:center;line-height:24px}
+.home-faq details[open] summary::after{content:"–"}
+.home-faq details p{margin:0;padding:0 18px 14px;line-height:1.5;color:var(--soft)}
+.home-faq details a{color:#d9568a}
 .about{max-width:640px;margin:0 auto 20px;line-height:1.5;font-size:.95rem}
 .about h2{font-size:1.1rem}
 .follow{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin:0 0 18px}
