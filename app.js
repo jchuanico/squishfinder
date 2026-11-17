@@ -199,6 +199,17 @@
   document.getElementById("disclosure").textContent = CONFIG.stores.some(function (st) { return st.tag; })
     ? "As an Amazon Associate we earn from qualifying purchases. Buying through our links supports this site at no extra cost to you."
     : "Shopping links may earn us a small commission at no extra cost to you.";
+  // dress up the static home-page footer with squish art
+  Array.prototype.forEach.call(document.querySelectorAll(".sq-strip a[data-id]"), function (a) {
+    var s = SQUISHES.filter(function (x) { return x.id === a.getAttribute("data-id"); })[0];
+    if (s) a.innerHTML = squishSVG(s, "happy") + "<span>" + a.textContent + "</span>";
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-art]"), function (el) {
+    el.innerHTML = el.getAttribute("data-art").split(",").map(function (id, i) {
+      var s = SQUISHES.filter(function (x) { return x.id === id; })[0];
+      return s ? squishSVG(s, i ? "wink" : "happy") : "";
+    }).join("");
+  });
 
   /* ---------------- quiz state ---------------- */
   var step = 0, answers = [], mode = "me";
