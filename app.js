@@ -14,6 +14,10 @@
     mood = mood || "open";
     var b = s.body, a = s.accent, ink = s.ink || "#3a2e45", eye = s.eye || "#2b2235";
     var back = "", front = "", face = 0, ex = 26, ey = 110, showMouth = true, eyeR = 1;
+    // clip patterns (tie-dye, cone lattice) to the body outline; ids stay unique on a page with many squishes
+    var BODY_D = "M100 40C152 40 182 70 182 116C182 162 150 180 100 180C50 180 18 162 18 116C18 70 48 40 100 40Z";
+    var clipId = "sqc" + (squishSVG.n = (squishSVG.n || 0) + 1);
+    var clipped = function (svg) { return svg ? '<g clip-path="url(#' + clipId + ')">' + svg + "</g>" : ""; };
     var t = s.type;
     if (t === "cat" || t === "fox") {
       var h = t === "fox" ? 22 : 30;
@@ -35,8 +39,10 @@
     }
     if (t === "cow") {
       back += '<polygon points="62,48 56,22 74,42" fill="#f3e2b8"/><polygon points="138,48 144,22 126,42" fill="#f3e2b8"/>';
-      back += '<ellipse cx="30" cy="78" rx="20" ry="10" fill="' + b + '" stroke="#e6e0ea" stroke-width="2"/><ellipse cx="170" cy="78" rx="20" ry="10" fill="' + b + '" stroke="#e6e0ea" stroke-width="2"/>';
-      front += '<ellipse cx="46" cy="148" rx="16" ry="13" fill="' + a + '"/><ellipse cx="152" cy="68" rx="20" ry="14" fill="' + a + '"/><ellipse cx="160" cy="150" rx="11" ry="9" fill="' + a + '"/>';
+      back += '<ellipse cx="30" cy="78" rx="20" ry="10" fill="' + b + '" stroke="#e6e0ea" stroke-width="2"/><ellipse cx="170" cy="78" rx="20" ry="10" fill="' + a + '"/>';
+      // one big black patch on the lower left (as on the real plush) plus a patch around the right ear
+      front += '<path d="M19 112 C30 120 50 132 58 154 C64 168 70 176 78 179 C46 177 20 160 19 112Z" fill="' + a + '"/>';
+      front += '<ellipse cx="148" cy="74" rx="22" ry="16" transform="rotate(20 148 74)" fill="' + a + '"/>';
       front += '<ellipse cx="100" cy="140" rx="30" ry="17" fill="#ffc6d6"/><ellipse cx="90" cy="140" rx="4" ry="5" fill="#d9879f"/><ellipse cx="110" cy="140" rx="4" ry="5" fill="#d9879f"/>';
       showMouth = false;
     }
@@ -60,9 +66,12 @@
       dots.forEach(function (d) { front += '<path d="M' + (d[0]-6) + ' ' + (d[1]-6) + 'l12 12M' + (d[0]+6) + ' ' + (d[1]-6) + 'l-12 12" stroke="#e5b52e" stroke-width="3" stroke-linecap="round"/>'; });
     }
     if (t === "unicorn") {
-      back += '<polygon points="46,70 54,38 80,52" fill="' + b + '" stroke="#f0e4f6" stroke-width="2"/><polygon points="154,70 146,38 120,52" fill="' + b + '" stroke="#f0e4f6" stroke-width="2"/>';
-      front += '<circle cx="62" cy="52" r="14" fill="#ffb3d9"/><circle cx="44" cy="70" r="12" fill="' + a + '"/><circle cx="34" cy="92" r="10" fill="#9fd9ff"/>';
-      front += '<polygon points="90,46 100,4 110,46" fill="#ffd166"/><path d="M93 34 l14 -4 M95 22 l10 -3" stroke="#e0a800" stroke-width="2.5"/>';
+      // white ears, pink horn with a darker swirl, white snout with pink nostrils (tie-dye comes from s.spots)
+      back += '<polygon points="34,74 30,42 70,52" fill="#fbf6fd" stroke="#dcc6ec" stroke-width="2.5"/><polygon points="166,74 170,42 130,52" fill="#fbf6fd" stroke="#dcc6ec" stroke-width="2.5"/>';
+      back += '<polygon points="40,64 37,49 56,54" fill="#ffc6e2"/><polygon points="160,64 163,49 144,54" fill="#ffc6e2"/>';
+      back += '<polygon points="90,46 100,6 110,46" fill="#ffb3d9"/><path d="M92 38 l16 -5 M94 27 l12 -4 M96 16 l8 -3" stroke="#e05aa0" stroke-width="2.5" stroke-linecap="round"/>';
+      front += '<ellipse cx="100" cy="136" rx="23" ry="13" fill="#fff"/><ellipse cx="92" cy="136" rx="3" ry="4" fill="#ff8fc0"/><ellipse cx="108" cy="136" rx="3" ry="4" fill="#ff8fc0"/>';
+      showMouth = false;
     }
     if (t === "shark") {
       back += '<polygon points="80,46 112,6 132,50" fill="' + b + '"/>';
@@ -74,8 +83,11 @@
       front += '<circle cx="62" cy="50" r="11" fill="#fff"/><circle cx="104" cy="34" r="9" fill="#fff"/><circle cx="144" cy="58" r="13" fill="#fff"/><circle cx="92" cy="72" r="7" fill="#fff"/><circle cx="34" cy="84" r="6" fill="#fff"/><circle cx="168" cy="88" r="5" fill="#fff"/>';
     }
     if (t === "bigfoot") {
-      back += '<path d="M78 46 Q86 18 96 42 Q102 14 110 42 Q120 20 124 48Z" fill="' + a + '"/>';
-      back += '<ellipse cx="22" cy="118" rx="12" ry="22" fill="' + a + '"/><ellipse cx="178" cy="118" rx="12" ry="22" fill="' + a + '"/>';
+      // shaggy tufts on top, big floppy ears, pale face mask and one little tooth
+      back += '<path d="M56 56 Q60 26 78 44 Q84 16 98 40 Q106 12 116 40 Q130 18 134 46 Q148 30 146 58Z" fill="' + a + '"/>';
+      back += '<ellipse cx="20" cy="104" rx="18" ry="28" transform="rotate(-12 20 104)" fill="' + a + '"/><ellipse cx="180" cy="104" rx="18" ry="28" transform="rotate(12 180 104)" fill="' + a + '"/>';
+      if (s.face) front += '<ellipse cx="100" cy="114" rx="50" ry="34" fill="' + s.face + '"/>';
+      front += '<rect x="108" y="126" width="6" height="7" rx="1.5" fill="#fff" stroke="#c9b9a8" stroke-width="1"/>';
     }
     if (t === "duck") {
       front += '<path d="M18 112 C18 66 50 40 100 40 C150 40 182 66 182 112 C150 98 50 98 18 112Z" fill="' + a + '"/>';
@@ -96,18 +108,23 @@
       back += '<ellipse cx="44" cy="54" rx="26" ry="18" fill="#dff3ff" stroke="#b9dcf2" stroke-width="2"/><ellipse cx="156" cy="54" rx="26" ry="18" fill="#dff3ff" stroke="#b9dcf2" stroke-width="2"/>';
       back += '<path d="M84 44 Q76 18 64 14" stroke="' + a + '" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="64" cy="14" r="6" fill="' + a + '"/>';
       back += '<path d="M116 44 Q124 18 136 14" stroke="' + a + '" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="136" cy="14" r="6" fill="' + a + '"/>';
-      front += '<path d="M26 82 C60 72 140 72 174 82 L170 70 C140 58 60 58 30 70Z" fill="' + a + '"/>';
-      front += '<path d="M22 164 C60 176 140 176 178 164 L172 156 C140 166 60 166 28 156Z" fill="' + a + '"/>';
+      // black-and-white striped belly, like the real plush
+      [124, 138, 152, 166].forEach(function (y) {
+        var hw = 50 * Math.sqrt(Math.max(0, 1 - Math.pow((y + 3 - 146) / 30, 2)));
+        front += '<rect x="' + (100 - hw).toFixed(1) + '" y="' + y + '" width="' + (2 * hw).toFixed(1) + '" height="7" rx="3" fill="' + a + '"/>';
+      });
     }
     if (t === "lion") {
       var m = "";
-      for (var q = 0; q < 16; q++) { var ang2 = q / 16 * Math.PI * 2; m += '<circle cx="' + (100 + Math.cos(ang2) * 84).toFixed(1) + '" cy="' + (112 + Math.sin(ang2) * 76).toFixed(1) + '" r="20" fill="' + a + '"/>'; }
+      for (var q = 0; q < 16; q++) { var ang2 = q / 16 * Math.PI * 2; m += '<circle cx="' + (100 + Math.cos(ang2) * 84).toFixed(1) + '" cy="' + (112 + Math.sin(ang2) * 76).toFixed(1) + '" r="20" fill="' + (s.mane ? s.mane[q % s.mane.length] : a) + '"/>'; }
       back += m + '<circle cx="54" cy="52" r="13" fill="' + b + '"/><circle cx="146" cy="52" r="13" fill="' + b + '"/>';
     }
     if (t === "beet") {
-      back += '<path d="M100 50 C80 20 70 8 82 2 C96 8 100 30 100 50Z" fill="#4caf50"/><path d="M100 50 C120 20 130 8 118 2 C104 8 100 30 100 50Z" fill="#3d9a41"/>';
-      front += '<path d="M30 74 C60 56 140 56 170 74" stroke="' + a + '" stroke-width="10" fill="none" stroke-linecap="round"/>';
-      front += '<path d="M140 62 l18 -14 l2 22Z M140 62 l-4 -22 l20 10Z" fill="' + a + '"/><circle cx="142" cy="60" r="6" fill="#ff6fb5"/>';
+      // short red stem and two green leaves with red veins; lighter stripes across the front
+      back += '<rect x="96" y="26" width="8" height="22" rx="4" fill="#a8304f"/>';
+      back += '<path d="M100 32 C82 10 66 8 66 20 C70 30 88 32 100 32Z" fill="#4caf50"/><path d="M100 32 C78 22 72 18 68 18" stroke="#c0395a" stroke-width="2" fill="none"/>';
+      back += '<path d="M100 30 C116 6 134 6 134 18 C130 28 112 30 100 30Z" fill="#3d9a41"/><path d="M100 30 C122 18 128 16 132 16" stroke="#c0395a" stroke-width="2" fill="none"/>';
+      front += '<path d="M44 150 Q100 168 156 150 M58 166 Q100 178 142 166" stroke="' + a + '" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>';
     }
     if (s.wings) {
       back += '<ellipse cx="30" cy="60" rx="30" ry="15" transform="rotate(-40 30 60)" fill="' + s.wings + '" stroke="#b9a8f0" stroke-width="2.5"/>' +
@@ -123,19 +140,34 @@
       front += '<ellipse cx="100" cy="126" rx="7" ry="5" fill="#5a3a22"/>';
     }
     if (t === "dog") {
-      back += '<path d="M38 80 Q26 4 86 48Z" fill="' + b + '"/><path d="M162 80 Q174 4 114 48Z" fill="' + b + '"/>' +
-              '<path d="M48 70 Q40 24 74 50Z" fill="#ffc6d6"/><path d="M152 70 Q160 24 126 50Z" fill="#ffc6d6"/>';
+      var ear = s.ear || b;
+      back += '<path d="M38 80 Q26 4 86 48Z" fill="' + ear + '"/><path d="M162 80 Q174 4 114 48Z" fill="' + ear + '"/>' +
+              '<path d="M48 70 Q40 24 74 50Z" fill="#fff"/><path d="M152 70 Q160 24 126 50Z" fill="#fff"/>';
       front += '<ellipse cx="100" cy="134" rx="36" ry="24" fill="' + s.belly + '"/><ellipse cx="100" cy="120" rx="9" ry="6.5" fill="#2b2235"/>';
-      front += '<path d="M36 150 Q100 178 164 150 L156 166 Q100 192 44 166Z" fill="' + a + '"/><path d="M86 170 L114 170 L100 194Z" fill="' + a + '"/>';
+      if (s.tongue) front += '<path d="M94 128 q6 16 12 0Z" fill="#ff7fa0"/>';
+      if (s.collar !== false) front += '<path d="M36 150 Q100 178 164 150 L156 166 Q100 192 44 166Z" fill="' + a + '"/><path d="M86 170 L114 170 L100 194Z" fill="' + a + '"/>';
     }
     if (t === "icecream") {
-      back += '<circle cx="100" cy="34" r="13" fill="' + a + '"/><path d="M100 22 q4 -14 16 -16" stroke="#3d9a41" stroke-width="3" fill="none" stroke-linecap="round"/>';
-      var sp2 = [[52,74,"#ff6b6b",20],[86,58,"#ffd166",-30],[128,64,"#7fd8c0",40],[150,92,"#a37bff",-15],[42,112,"#9fd9ff",35],[160,128,"#ff9fc2",-40],[70,160,"#ffd166",25],[132,162,"#7fd8c0",-25],[110,40,"#a37bff",10]];
-      sp2.forEach(function (q) { front += '<rect x="' + (q[0] - 7) + '" y="' + (q[1] - 2.5) + '" width="14" height="5" rx="2.5" fill="' + q[2] + '" transform="rotate(' + q[3] + ' ' + q[0] + ' ' + q[1] + ')"/>'; });
+      // chocolate topping with sprinkles, tie-dye scoop (s.spots), and a waffle cone with a diamond pattern
+      front += '<path d="M32 76 C44 50 70 41 100 41 C130 41 156 50 168 76 Q158 86 148 76 Q137 90 125 77 Q113 91 101 77 Q89 91 77 77 Q65 89 54 76 Q43 86 32 76Z" fill="' + a + '"/>';
+      var sp2 = [[64,62,"#ff6b6b",20],[86,52,"#ffd166",-30],[118,54,"#7fd8c0",40],[140,64,"#a37bff",-15],[100,66,"#9fd9ff",35],[76,72,"#ff9fc2",-40],[128,72,"#ffd166",25]];
+      sp2.forEach(function (q) { front += '<rect x="' + (q[0] - 6) + '" y="' + (q[1] - 2) + '" width="12" height="4.5" rx="2.2" fill="' + q[2] + '" transform="rotate(' + q[3] + ' ' + q[0] + ' ' + q[1] + ')"/>'; });
+      front += '<path d="M20 138 Q30 148 40 138 Q50 148 60 138 Q70 148 80 138 Q90 148 100 138 Q110 148 120 138 Q130 148 140 138 Q150 148 160 138 Q170 148 180 138 C178 166 150 180 100 180 C50 180 22 166 20 138Z" fill="' + (s.cone || "#c98a4e") + '"/>';
+      var lat = "";
+      for (var d = 0; d < 6; d++) { var lx0 = 34 + d * 24; lat += "M" + lx0 + " 148 l26 26 M" + (lx0 + 26) + " 148 l-26 26 "; }
+      front += clipped('<path d="' + lat + '" stroke="#9c6533" stroke-width="2.5" stroke-linecap="round"/>');
     }
-    (s.spots || []).forEach(function (p) { front += '<ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="' + p[2] + '" ry="' + p[3] + '" fill="' + p[4] + '"/>'; });
+    if (s.flower) {
+      front += '<g transform="translate(66 56)">' + [0, 72, 144, 216, 288].map(function (r) { return '<ellipse cx="0" cy="-8" rx="6" ry="8" fill="' + s.flower + '" transform="rotate(' + r + ')"/>'; }).join("") + '<circle r="4.5" fill="#fff"/></g>';
+    }
+    var spotsSvg = "";
+    (s.spots || []).forEach(function (p) { spotsSvg += '<ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="' + p[2] + '" ry="' + p[3] + '" fill="' + p[4] + '"' + (p[5] ? ' opacity="' + p[5] + '"' : "") + '/>'; });
+    // tie-dye blotches sit under the type's features (snout, cone, topping); patches and seeds sit on top
+    spotsSvg = clipped(spotsSvg);
+    if (s.dyeUnder) front = spotsSvg + front; else front += spotsSvg;
 
-    var body = '<path d="M100 40C152 40 182 70 182 116C182 162 150 180 100 180C50 180 18 162 18 116C18 70 48 40 100 40Z" fill="' + b + '"/>';
+    var body = '<clipPath id="' + clipId + '"><path d="' + BODY_D + '"/></clipPath><path d="' + BODY_D + '" fill="' + b + '"/>';
+    if (s.stripes) body += '<path d="M100 42 L100 178 M70 46 Q56 110 68 176 M130 46 Q144 110 132 176 M42 66 Q26 116 44 166 M158 66 Q174 116 156 166" stroke="' + s.stripes + '" stroke-width="8" fill="none" stroke-linecap="round"/>';
     var belly = s.belly ? '<ellipse cx="100" cy="146" rx="' + (t === "hedgehog" ? 62 : 50) + '" ry="' + (t === "hedgehog" ? 44 : 30) + '" fill="' + s.belly + '"/>' : "";
     if (t === "hedgehog") belly = '<ellipse cx="100" cy="128" rx="60" ry="46" fill="' + s.belly + '"/>';
 
