@@ -37,11 +37,12 @@
   try {
     var foot = document.querySelector(".foot");
     if (foot) {
-      var p = document.createElement("p");
+      var p = document.createElement("div");
       p.className = "follow";
-      p.innerHTML = '🎬 Follow Squish Finder: <a href="https://www.tiktok.com/@squishfinder22" target="_blank" rel="me noopener">TikTok</a> · ' +
-        '<a href="https://www.instagram.com/squishfinder22/" target="_blank" rel="me noopener">Instagram</a> · ' +
-        '<a href="https://www.youtube.com/@squishfinder22" target="_blank" rel="me noopener">YouTube Shorts</a>';
+      p.innerHTML = '<span>Follow Squish Finder</span>' +
+        '<a href="https://www.facebook.com/squishfinder" target="_blank" rel="me noopener">💙 Facebook</a>' +
+        '<a href="https://www.instagram.com/squishfinder22/" target="_blank" rel="me noopener">📸 Instagram</a>' +
+        '<a href="https://www.youtube.com/@squishfinder22" target="_blank" rel="me noopener">▶️ YouTube Shorts</a>';
       foot.insertBefore(p, foot.firstChild);
     }
   } catch (e) {}
