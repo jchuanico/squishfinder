@@ -21,6 +21,10 @@ a.card .note{line-height:1.25;margin-top:2px}
 .shared-banner{background:#fff0f7;border:2px dashed var(--pink);border-radius:20px;padding:12px 16px;margin:6px 0 14px;text-align:center}
 .shared-banner p{margin:0 0 10px;line-height:1.45}
 .sources a{color:var(--soft)}
+.updated{font-size:.85rem;color:var(--soft);margin:0 0 8px}
+.faq dt{font-weight:800;margin-top:12px}
+.faq dt:first-child{margin-top:4px}
+.faq dd{margin:4px 0 0;line-height:1.5}
 @media (max-width:640px){ .traits th{width:42%} .panel{padding:14px}
   .logo{white-space:nowrap} .top .chip{padding:6px 10px;font-size:.85rem;white-space:nowrap} }
 @media (max-width:420px){ .top-actions .chip:first-child{display:none} }
