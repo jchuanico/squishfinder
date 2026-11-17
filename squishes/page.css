@@ -18,6 +18,8 @@ main.page{max-width:900px;margin:0 auto;padding:8px 16px 32px}
 a.card{text-decoration:none;color:inherit}
 a.card .note{line-height:1.25;margin-top:2px}
 .sources{margin-top:18px;line-height:1.6}
+.shared-banner{background:#fff0f7;border:2px dashed var(--pink);border-radius:20px;padding:12px 16px;margin:6px 0 14px;text-align:center}
+.shared-banner p{margin:0 0 10px;line-height:1.45}
 .sources a{color:var(--soft)}
 @media (max-width:640px){ .traits th{width:42%} .panel{padding:14px}
   .logo{white-space:nowrap} .top .chip{padding:6px 10px;font-size:.85rem;white-space:nowrap} }

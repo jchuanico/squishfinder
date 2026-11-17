@@ -14,8 +14,24 @@
                     facebook: /facebook|fb\.|messenger/, instagram: /instagram/, tiktok: /tiktok/ }, src = null;
       if (utm && known[utm.toLowerCase()]) src = utm.toLowerCase();
       else { for (var k in known) if (known[k].test(host)) { src = k; break; } }
+      if (!src && /[?&]from=share/.test(location.search)) src = "shared";
       if (!src) src = !host ? "direct" : (host === location.hostname ? null : "other");
       track(src ? ["visit", "src_" + src] : "visit");
+    }
+  } catch (e) {}
+  // arrived from a friend's shared result: say so and point them at the quiz
+  try {
+    if (/[?&]from=share/.test(location.search)) {
+      var h1 = document.querySelector(".detail h1"), main = document.querySelector("main.page");
+      if (h1 && main) {
+        var name = h1.textContent.replace(/ Squishmallow$/, ""), gift = /[?&]gift=1/.test(location.search);
+        var box = document.createElement("div");
+        box.className = "shared-banner";
+        box.innerHTML = "<p>" + (gift ? "💌 A friend thinks <b></b> is the perfect Squishmallow gift!" : "💌 A friend got <b></b> in the Squish Finder quiz!") +
+          " Which one are <b>you</b>?</p><a class=\"btn\" href=\"/\">Take the 6-question quiz ✨</a>";
+        box.querySelector("b").textContent = name;
+        main.insertBefore(box, main.firstChild);
+      }
     }
   } catch (e) {}
   try {
