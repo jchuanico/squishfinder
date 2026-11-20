@@ -440,7 +440,7 @@
       '<p class="tips"><b>🛍️ Shopping tips:</b> Squishmallows come in several sizes, commonly 5", 8", 12", 16" and 24". Big ones are best for hugging, small ones for collecting. Check the size in the listing before you buy.</p>' +
       shareBtns +
       '<p class="note"><a href="/squishes/' + s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + '">📖 ' + s.name.split(" ")[0] + "'s full profile: rarity, editions & collector notes →</a></p>" +
-      '<p class="note"><a href="/squishmallow-coloring-pages#' + s.id + '">🖍️ Print a free ' + s.name.split(" ")[0] + " colouring page →</a></p>" +
+      '<p class="note"><a href="/squishmallow-coloring-pages#colour-' + s.id + '">🎨 Colour ' + s.name.split(" ")[0] + " online (free colouring page) →</a></p>" +
       '<p class="note">🇨🇦 Canada? Use Amazon.ca. 🇺🇸 USA? Use Amazon.com. ' + (shared ? "" : "Your vote was counted! ") + 'Prices and stock vary by store.</p></div></div>' +
       '<div class="row"><button class="btn alt" data-go="poll">📊 See the poll</button><button class="btn alt" data-go="start">' + (shared ? "Take the quiz" : "Retake quiz") + "</button></div>",
       "?s=" + s.id, s.name + " | Squish Finder");
