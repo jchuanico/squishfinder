@@ -275,6 +275,80 @@
     } else manual();
   }
 
+  /* ---------------- result card (a picture people can save or post) ---------------- */
+  function slugOf(s) { return s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  function matchPct(id) {
+    if (answers.length !== QUESTIONS.length) return 0;
+    return Math.max(10, Math.round((scores()[id] / QUESTIONS.length) * 100));
+  }
+  function roundRect(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function fitText(c, text, maxW, size, weight) {
+    do { c.font = weight + " " + size + 'px "Baloo 2", system-ui, sans-serif'; size -= 4; } while (c.measureText(text).width > maxW && size > 30);
+  }
+  function makeCard(s, gift) {
+    var W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var c = cv.getContext("2d"), pct = matchPct(s.id);
+    var svg = squishSVG(s, "happy").replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" width="620" height="620" ');
+    var img = new Image();
+    var fontReady = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('800 80px "Baloo 2"'), document.fonts.load('700 40px "Baloo 2"')]).catch(function () {}) : Promise.resolve();
+    var imgReady = new Promise(function (ok, bad) { img.onload = ok; img.onerror = bad; img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); });
+    return Promise.all([fontReady, imgReady]).then(function () {
+      var g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#ffd6e8"); g.addColorStop(1, "#dcd2ff");
+      c.fillStyle = g; c.fillRect(0, 0, W, H);
+      c.fillStyle = "rgba(255,255,255,.5)";
+      [[120, 160, 60], [960, 240, 44], [90, 1080, 50], [990, 1010, 70], [540, 70, 26]].forEach(function (d) { c.beginPath(); c.arc(d[0], d[1], d[2], 0, 7); c.fill(); });
+      c.fillStyle = "rgba(163,123,255,.18)"; roundRect(c, 70, 128, W - 140, 1000, 64); c.fill();
+      c.fillStyle = "#fff"; roundRect(c, 70, 110, W - 140, 1000, 64); c.fill();
+      c.textAlign = "center"; c.textBaseline = "alphabetic";
+      c.fillStyle = "#a37bff"; c.font = '700 54px "Baloo 2", system-ui, sans-serif';
+      c.fillText(gift ? "The perfect gift pick is…" : "My Squishmallow match is…", W / 2, 210);
+      c.drawImage(img, (W - 620) / 2, 225, 620, 620);
+      c.fillStyle = "#4a3b5c"; fitText(c, s.name, W - 220, 96, 800); c.fillText(s.name, W / 2, 900);
+      if (pct) {
+        var label = pct + "% match 💗"; c.font = '800 46px "Baloo 2", system-ui, sans-serif';
+        var bw = c.measureText(label).width + 70; c.fillStyle = "#ff7fae"; roundRect(c, (W - bw) / 2, 930, bw, 76, 38); c.fill();
+        c.fillStyle = "#fff"; c.fillText(label, W / 2, 984);
+      }
+      c.fillStyle = "#8a7a9c"; fitText(c, s.squad + " · loves " + s.fav.toLowerCase(), W - 240, 40, 700);
+      c.fillText(s.squad + " · loves " + s.fav.toLowerCase(), W / 2, pct ? 1068 : 990);
+      c.fillStyle = "#4a3b5c"; c.font = '800 60px "Baloo 2", system-ui, sans-serif';
+      c.fillText(gift ? "Who should YOU gift? 🎁" : "Which one are YOU? 🧸", W / 2, 1210);
+      c.fillStyle = "#ff7fae"; c.font = '800 50px "Baloo 2", system-ui, sans-serif'; c.fillText("squishfinder.ca", W / 2, 1282);
+      return new Promise(function (ok) { cv.toBlob(ok, "image/png"); });
+    });
+  }
+  function showCard(s, gift) {
+    track("card");
+    var old = document.querySelector(".card-modal"); if (old) old.remove();
+    var m = document.createElement("div");
+    m.className = "card-modal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-label", "Your squish card");
+    m.innerHTML = '<div class="card-box"><button class="card-x" aria-label="Close">✕</button><p class="sub">Making your card…</p></div>';
+    document.body.appendChild(m);
+    function close() { m.remove(); }
+    m.addEventListener("click", function (e) { if (e.target === m || e.target.closest(".card-x")) close(); });
+    makeCard(s, gift).then(function (blob) {
+      var url = URL.createObjectURL(blob), name = "my-squish-" + slugOf(s) + ".png";
+      var file = null; try { file = new File([blob], name, { type: "image/png" }); } catch (e) {}
+      var canShare = file && navigator.canShare && navigator.canShare({ files: [file] });
+      m.querySelector(".card-box").innerHTML = '<button class="card-x" aria-label="Close">✕</button>' +
+        '<img src="' + url + '" alt="' + s.name + ' result card">' +
+        '<div class="row">' + (canShare ? '<button class="btn" data-cshare>📤 Share picture</button>' : "") +
+        '<a class="btn' + (canShare ? " alt" : "") + '" data-csave href="' + url + '" download="' + name + '">⬇️ Save picture</a></div>' +
+        '<p class="note">Post it to your Story or send it to a friend! On a phone you can also press and hold the picture to save it.</p>';
+      var sb = m.querySelector("[data-cshare]");
+      if (sb) sb.addEventListener("click", function () {
+        track("card_share");
+        navigator.share({ files: [file], title: "My Squishmallow match", text: (gift ? "Perfect gift pick: " : "I got ") + s.name + "! Which one are you? squishfinder.ca" }).catch(function () {});
+      });
+      m.querySelector("[data-csave]").addEventListener("click", function () { track("card_save"); });
+    }, function () {
+      m.querySelector(".card-box").innerHTML = '<button class="card-x" aria-label="Close">✕</button><p class="sub">Sorry, we couldn\'t make the picture on this device. Try the Share button instead.</p>';
+    });
+  }
+
   /* ---------------- screens ---------------- */
   function home() {
     step = 0; answers = [];
@@ -345,7 +419,8 @@
     confetti();
     var gift = mode === "gift" && !shared;
     var badge = shared ? "Shared with you 💌" : gift ? "Great gift pick 🎁" : "Your favorite 💗";
-    var shareBtns = '<div class="share-row"><button class="btn alt share" data-share="' + s.id + '">📤 ' + (gift ? "Share this pick" : "Share my result") + "</button>" +
+    var shareBtns = '<div class="share-row">' + (shared ? "" : '<button class="btn share" data-card="' + s.id + '">🖼️ ' + (gift ? "Get a gift-pick card" : "Get my squish card") + "</button>") +
+      '<button class="btn alt share" data-share="' + s.id + '">📤 ' + (gift ? "Share this pick" : "Share my result") + "</button>" +
       (gift ? '<button class="btn alt share" data-go="invite">🎁 Send them the quiz</button>' : "") + "</div>";
     var buttons = CONFIG.stores.map(function (st, i) {
       return '<a class="btn buy' + (i ? " alt" : "") + '" data-buy="' + (/\.ca$/.test(st.domain) ? "ca" : "com") + '" data-id="' + s.id +
@@ -365,6 +440,7 @@
       '<p class="tips"><b>🛍️ Shopping tips:</b> Squishmallows come in several sizes, commonly 5", 8", 12", 16" and 24". Big ones are best for hugging, small ones for collecting. Check the size in the listing before you buy.</p>' +
       shareBtns +
       '<p class="note"><a href="/squishes/' + s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + '">📖 ' + s.name.split(" ")[0] + "'s full profile: rarity, editions & collector notes →</a></p>" +
+      '<p class="note"><a href="/squishmallow-coloring-pages#' + s.id + '">🖍️ Print a free ' + s.name.split(" ")[0] + " colouring page →</a></p>" +
       '<p class="note">🇨🇦 Canada? Use Amazon.ca. 🇺🇸 USA? Use Amazon.com. ' + (shared ? "" : "Your vote was counted! ") + 'Prices and stock vary by store.</p></div></div>' +
       '<div class="row"><button class="btn alt" data-go="poll">📊 See the poll</button><button class="btn alt" data-go="start">' + (shared ? "Take the quiz" : "Retake quiz") + "</button></div>",
       "?s=" + s.id, s.name + " | Squish Finder");
@@ -504,6 +580,7 @@
       return;
     }
     if (t.dataset.fav) return detail(t.dataset.fav);
+    if (t.dataset.card) return showCard(byId[t.dataset.card], mode === "gift");
     if (t.dataset.share) {
       track("share");
       var sh = byId[t.dataset.share];
