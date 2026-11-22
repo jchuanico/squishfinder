@@ -143,6 +143,7 @@ p.sub{color:var(--soft);font-size:1.15rem;margin:.2em 0 1em}
 .gift-box p b{color:var(--ink)}
 .gift-box .btn{font-size:1.1rem;padding:10px 24px}
 .gift-art{display:flex;flex:none;align-items:flex-end}
+.mini-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-weight:700}.mini-links a{color:#d9568a}
 .gift-art .squish{width:96px}
 .gift-art .squish+.squish{width:72px;margin-left:-18px;animation-delay:-1.1s}
 
@@ -192,6 +193,7 @@ p.sub{color:var(--soft);font-size:1.15rem;margin:.2em 0 1em}
   .logo{font-size:1.1rem}
   .gift-box{flex-direction:column;text-align:center;padding:18px 18px 22px}
   .gift-art .squish{width:84px} .gift-art .squish+.squish{width:64px}
+  .mini-links{justify-content:center}
   .sq-strip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;padding:4px 16px 12px;margin:8px -16px 10px;scrollbar-width:none}
   .sq-strip::-webkit-scrollbar{display:none}
   .sq-strip a{flex:0 0 96px;scroll-snap-align:start}

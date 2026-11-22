@@ -221,7 +221,7 @@
       ],
       questions: [
         { q: "How do you like to squeeze?", a: [
-          { t: "🫠 Slow and gooey", p: ["glob"] }, { t: "🧊 Firm, then squish", p: ["cube"] },
+          { t: "🍬 Slow and gooey", p: ["glob"] }, { t: "🧊 Firm, then squish", p: ["cube"] },
           { t: "🍬 Stretchy and bouncy", p: ["gumdrop"] }, { t: "❄️ With a crunch", p: ["snowball"] } ] },
         { q: "Where does your squishy live?", a: [
           { t: "🎒 Clipped to my backpack, with friends", p: ["teenie"] }, { t: "🛏️ On my pillow", p: ["cat", "glob"] },
@@ -275,6 +275,12 @@
     }
   };
   window.MINIS = MINIS;
+  // other pages can show the art: <div data-mini-art="kpdh:derpy,needoh:glob"></div>
+  Array.prototype.forEach.call(document.querySelectorAll("[data-mini-art]"), function (el) {
+    el.innerHTML = el.getAttribute("data-mini-art").split(",").map(function (p) {
+      var k = p.split(":"); return MINIS[k[0]] ? MINIS[k[0]].art(k[1]).replace("<svg ", '<svg class="squish" ') : "";
+    }).join("");
+  });
 
   var key = document.body.getAttribute("data-mini"), M = MINIS[key], box = document.getElementById("mq");
   if (!M || !box) return;
