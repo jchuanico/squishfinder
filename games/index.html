@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dream Catcher: Squishmallow Claw Game | Squish Finder</title>
+<meta name="description" content="Dream Catcher: a free Squishmallow claw machine game. Steer the claw over a giant bin of squishes, drop, grab and collect all 24 on your shelf.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2a1d47">
+<link rel="canonical" href="https://squishfinder.ca/games/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#1d1433;--bg2:#2e2152;--card:#3a2b63;--ink:#fff6fb;--soft:#cbbde6;--pink:#ff7fae;--pink2:#ff5c97;--gold:#ffd166;--line:#4d3b7d}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:radial-gradient(120% 80% at 50% 0%,#3b2a69 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);font-family:"Baloo 2",system-ui,sans-serif}
+  a{color:var(--pink)}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:8px;max-width:560px;margin:0 auto;padding:8px 12px 4px}
+  .logo{color:var(--ink);text-decoration:none;font-weight:800;font-size:1.05rem}
+  .toggles{display:flex;gap:6px}
+  .chip{font:inherit;font-weight:700;font-size:.9rem;border:0;border-radius:999px;padding:4px 12px;background:var(--card);color:var(--ink);cursor:pointer}
+  .chip[aria-pressed="false"]{opacity:.55}
+  main{max-width:560px;margin:0 auto;padding:0 12px 24px}
+  .stage{position:relative;margin:0 auto;width:min(520px,100%,calc((100svh - 190px) * .72));min-width:min(280px,100%)}
+  canvas{display:block;width:100%;height:auto;touch-action:none;border-radius:22px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;
+    background:rgba(29,20,51,.78);border-radius:22px;backdrop-filter:blur(2px)}
+  .overlay[hidden]{display:none}
+  .overlay h1{margin:0;font-size:clamp(2rem,9vw,3.1rem);line-height:1;color:var(--pink);text-shadow:0 3px 0 #7a2a55}
+  .overlay h2{margin:0 0 .2em;font-size:clamp(1.5rem,7vw,2.2rem);color:var(--gold)}
+  .overlay p{margin:.5em 0;color:var(--soft);max-width:30ch}
+  .overlay .how{font-size:.92rem;line-height:1.35}
+  .big{font:inherit;font-weight:800;font-size:1.25rem;border:0;border-radius:999px;padding:12px 26px;margin-top:10px;cursor:pointer;
+    background:linear-gradient(180deg,#ff9cc2,var(--pink2));color:#fff;box-shadow:0 5px 0 #b23d6d;touch-action:manipulation}
+  .big:active{transform:translateY(3px);box-shadow:0 2px 0 #b23d6d}
+  .got{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin:6px 0;max-width:320px}
+  .got svg{width:48px;height:48px}
+  .toast{position:absolute;left:50%;top:13%;transform:translate(-50%,-20px) scale(.9);opacity:0;pointer-events:none;transition:.25s;
+    background:#fff;color:#4a3b5c;border-radius:18px;padding:8px 14px 8px 8px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 0 rgba(0,0,0,.25);width:max-content;max-width:92%}
+  .toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+  .toast svg{width:56px;height:56px;flex:none}
+  .toast b{display:block;line-height:1.1}
+  .toast span{font-size:.85rem;color:#ff5c97;font-weight:700}
+  .toast.gold{background:linear-gradient(180deg,#fff7d6,#ffe08a)}
+  .pad{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:10px;width:min(520px,100%);margin:10px auto 0}
+  .pad button{font:inherit;font-weight:800;border:0;border-radius:20px;height:64px;font-size:1.7rem;color:#fff;cursor:pointer;
+    touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  .pad .mv{background:linear-gradient(180deg,#8f73e6,#6b4fcf);box-shadow:0 5px 0 #3f2c86}
+  .pad .drop{background:linear-gradient(180deg,#ff9cc2,var(--pink2));box-shadow:0 5px 0 #b23d6d;font-size:1.35rem;letter-spacing:.04em}
+  .pad button.on{transform:translateY(4px);box-shadow:0 1px 0 #3f2c86}
+  .pad .drop.on{box-shadow:0 1px 0 #b23d6d}
+  .pad button:disabled{filter:grayscale(.6);opacity:.6}
+  .keys{text-align:center;color:var(--soft);font-size:.85rem;margin:8px 0 0}
+  @media (hover:none){.keys{display:none}}
+  kbd{background:var(--card);border-radius:6px;padding:0 6px;font-family:inherit;font-weight:700;color:var(--ink)}
+  .shelf{margin-top:22px;background:var(--bg2);border-radius:22px;padding:12px 14px 16px}
+  .shelf h2{margin:0;font-size:1.25rem}
+  .shelf .sub{margin:0 0 8px;color:var(--soft);font-size:.9rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+  .cell{position:relative;background:var(--card);border-radius:14px;padding:4px 2px 2px;text-align:center;text-decoration:none;color:var(--ink);font-size:.7rem;line-height:1.05}
+  .cell svg{width:100%;height:auto;display:block}
+  .cell.no svg{filter:brightness(0) opacity(.28)}
+  .cell.no{color:var(--soft)}
+  .cell i{position:absolute;top:2px;right:4px;font-style:normal;font-weight:800;font-size:.75rem;background:var(--pink2);color:#fff;border-radius:99px;padding:0 5px}
+  .cell.gold{background:linear-gradient(180deg,#6b5330,#3a2b63)}
+  .cell.gold::after{content:"✨";position:absolute;top:0;left:4px;font-size:.8rem}
+  .more{margin-top:18px;text-align:center;color:var(--soft);font-size:.92rem}
+  .fine{margin-top:14px;text-align:center;color:#9b8cba;font-size:.75rem}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="/">🧸 Squish Finder</a>
+  <div class="toggles">
+    <button class="chip" id="musicBtn" aria-pressed="true" title="Music on/off">🎵 Music</button>
+    <button class="chip" id="sfxBtn" aria-pressed="true" title="Sound effects on/off">🔊 Sounds</button>
+  </div>
+</header>
+<main>
+  <div class="stage" id="stage">
+    <canvas id="game" width="720" height="1000" aria-label="Dream Catcher claw machine full of Squishmallows"></canvas>
+    <div class="toast" id="toast" aria-live="polite"></div>
+    <div class="overlay" id="title">
+      <h1>Dream Catcher</h1>
+      <p>Steer the claw over the giant bin of Squishmallows, drop it, and catch as many as you can!</p>
+      <p class="how">👆 Tap the glass or use ◀ ▶ to move the claw, then hit DROP.<br>🎯 Line the claw up with the middle of a squish for the best grip.<br>💰 10 tokens. A <b>new</b> squish for your shelf wins a bonus token, a ✨ golden one wins 2.</p>
+      <button class="big" id="playBtn">Insert coin</button>
+    </div>
+    <div class="overlay" id="over" hidden>
+      <h2>Out of tokens!</h2>
+      <p id="overText"></p>
+      <div class="got" id="overGot"></div>
+      <button class="big" id="againBtn">Play again</button>
+    </div>
+  </div>
+  <div class="pad">
+    <button class="mv" id="leftBtn" aria-label="Move claw left">◀</button>
+    <button class="drop" id="dropBtn" aria-label="Drop the claw">DROP</button>
+    <button class="mv" id="rightBtn" aria-label="Move claw right">▶</button>
+  </div>
+  <p class="keys"><kbd>←</kbd> <kbd>→</kbd> to move, <kbd>Space</kbd> to drop. Or click/drag on the machine.</p>
+
+  <section class="shelf">
+    <h2>My squish shelf</h2>
+    <p class="sub" id="shelfSub"></p>
+    <div class="grid" id="shelfGrid"></div>
+  </section>
+  <p class="more">Want to know which Squishmallow <i>you</i> are? <a href="/">Take the free quiz</a></p>
+  <p class="fine">Fan-made game. Not affiliated with or endorsed by Jazwares or Squishmallows. Illustrations are original fan art.</p>
+</main>
+<script src="../data.js"></script>
+<script src="squish-art.js"></script>
+<script src="claw.js"></script>
+</body>
+</html>
