@@ -23,7 +23,7 @@ const LIM = { x0: -0.92, x1: 0.92, z0: -0.55, z1: 0.55 }; // the whole bin is re
 const TOP_Y = 2.36, MIN_Y = 0.5, RAIL_Y = 2.62;
 const STEP = 1 / 120, GRAV = 18;
 const MOVE_V = 0.9, MOVE_A = 5, DROP_V = 1.25, LIFT_V = 0.8, CARRY_V = 0.9;
-const TURN_TIME = 25, START_TOKENS = 10, BIN_COUNT = 16, REFILL_BELOW = 12;
+const TURN_TIME = 25, START_TOKENS = 10, BIN_COUNT = 20, REFILL_BELOW = 15;
 const G_SQ = 1, G_CLAW = 2, G_ST = 4;
 
 /* claw geometry (arm local frame: +x points out from the hub, -y down) */
@@ -38,11 +38,12 @@ const T = {
   closeSpeed: 1.3, // how fast the prongs close (rad/s); too fast and squishes squirt out
   closed: -0.3,    // fully closed prong angle
   capK: 2.6,       // grip capacity = sum of touching prongs' strength x squish friction x centring x capK
-  twoArm: 0.62,    // only two prongs touching holds this much of a three-prong grip
+  twoArm: 0.5,   // only two prongs touching holds this much of a three-prong grip
   hug: 0.0008,       // prong motor force while holding, as a share of its strength: weight that pries a prong open
                    // past this makes it give, so each prong's own strength decides whether the cradle holds
   // note: cannon applies motor limits per step, so motor numbers act ~120x stronger than they read (the joint uses cap*STEP)
-  // tuned with automation/claw3d-test.js (2026-11-25, fresh pile every 5 drops): centred ~37% caught, half-off ~23%, edge ~0%
+  // tuned with automation/claw3d-test.js (2026-11-25, smaller squishes, fresh pile every 5 drops): centred ~55-65% caught,
+  // half-off ~40%, edge ~10%
   slipDist: 0.09   // a gripped squish that sags this far out of the claw slips free
 };
 const GRIP_FRIC = [0.78, 0.88, 1.0]; // slippery, plush, grippy
@@ -60,13 +61,15 @@ const TYPE = {
 const DEF = [1, 1.15, 0.56, 1, 1];
 function profile(s) {
   const t = TYPE[s.type] || DEF, k = t[0] * rnd(0.95, 1.05);
-  const w = 0.84 * k, h = w / t[1], d = w * t[2];
-  return { w, h, d, mass: t[3] * k, grip: t[4] };
+  const w = 0.72 * k, h = w / t[1], d = w * t[2];
+  return { w, h, d, mass: t[3] * k * 0.85, grip: t[4] };
 }
 // difficulty stars per squish (1 easy .. 3 tricky), from automated grab tests (each squish alone, near-centred drops,
-// automation/claw3d-test.js, 2026-11-25): always caught = 1 star, sometimes = 2, rarely = 3. Re-measure if T or TYPE changes.
-let STARS = { benny: 3, connor: 3, leonard: 2, wendy: 2, malcolm: 2, gordon: 2, stacy: 2, claudia: 2, simon: 2,
-  cam: 1, archie: 1, fifi: 1, hans: 1, winston: 1, maui: 1, lola: 1, avery: 1, danny: 1, sunny: 1, olma: 1, noelani: 1, marcella: 1, reginald: 1, glady: 1 };
+// automation/claw3d-test.js single(id, 0.8): 8 sloppy-aim drops each, 2026-11-25 after shrinking): 7-8 caught = 1 star,
+// 5-6 = 2, 4 or fewer = 3. Re-measure if T or TYPE changes.
+let STARS = { simon: 3, gordon: 3, benny: 3, leonard: 3, olma: 3,
+  cam: 2, wendy: 2, malcolm: 2, connor: 2, hans: 2, maui: 2, lola: 2, avery: 2, claudia: 2, reginald: 2,
+  archie: 1, fifi: 1, winston: 1, stacy: 1, danny: 1, sunny: 1, noelani: 1, marcella: 1, glady: 1 };
 function starsFor(s) {
   if (STARS[s.id]) return STARS[s.id];
   const t = TYPE[s.type] || DEF;
