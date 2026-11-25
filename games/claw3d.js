@@ -4,6 +4,7 @@
    site's own squish art, each type with its own size, shape, weight and slipperiness. */
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 const SQ = window.SQUISHES, byId = {};
 SQ.forEach((s) => { byId[s.id] = s; });
@@ -94,25 +95,58 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.shadowMap.autoUpdate = false;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color("#1f1745");
+// soft studio reflections for the chrome, glass and lacquer, and gentle wrap-around light for the plush
+{
+  const pm = new THREE.PMREMGenerator(renderer);
+  scene.environment = pm.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+  pm.dispose();
+}
 const cam = new THREE.PerspectiveCamera(40, 0.82, 0.1, 40);
 const sideCam = new THREE.PerspectiveCamera(36, 1.25, 0.1, 40);
 sideCam.position.set(3.4, 1.25, 0.05); sideCam.lookAt(0, 0.95, 0.05);
 
-scene.add(new THREE.HemisphereLight(0xfff4ff, 0x5a3f99, 1.5));
-const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+scene.add(new THREE.HemisphereLight(0xfff4ff, 0x5a3f99, 0.55));
+const sun = new THREE.DirectionalLight(0xfff6ee, 1.5);
 sun.position.set(1.1, 5.5, 2.4); sun.castShadow = true;
 sun.shadow.mapSize.set(1024, 1024);
 Object.assign(sun.shadow.camera, { left: -1.8, right: 1.8, top: 1.8, bottom: -1.8, near: 1, far: 10 });
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.02;
 scene.add(sun);
-const glow = new THREE.PointLight(0xff8fc0, 6, 6, 1.6); glow.position.set(0, 2.4, 0.6); scene.add(glow);
+const glow = new THREE.PointLight(0xff9cc8, 2.2, 6, 1.6); glow.position.set(0, 2.4, 0.6); scene.add(glow);
+const fill = new THREE.DirectionalLight(0xc8d4ff, 0.45); fill.position.set(-2.5, 1.5, 3); scene.add(fill);
 
 function canvasTex(w, h, draw) {
   const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
+/* tileable fabric normal map: thousands of short fibres plus fine grain, turned into surface normals.
+   On the squishes it breaks up the smooth "plastic ball" shading into minky fuzz; on the floor it reads as felt. */
+function fabricNormal(N, fibres, fibreLen, strength) {
+  const h = new Float32Array(N * N), at = (x, y) => ((y + N) % N) * N + ((x + N) % N);
+  for (let i = 0; i < h.length; i++) h[i] = Math.random() * 0.35;
+  for (let f = 0; f < fibres; f++) {
+    let x = Math.random() * N, y = Math.random() * N;
+    const a = Math.random() * Math.PI * 2, L = fibreLen * (0.5 + Math.random()), dx = Math.cos(a), dy = Math.sin(a);
+    for (let s = 0; s < L; s++) { h[at(Math.round(x), Math.round(y))] += 0.55; x += dx; y += dy; }
+  }
+  const b = new Float32Array(N * N); // one soft blur so fibres look fuzzy, not scratched
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) b[at(x, y)] = (h[at(x, y)] * 4 + h[at(x - 1, y)] + h[at(x + 1, y)] + h[at(x, y - 1)] + h[at(x, y + 1)]) / 8;
+  const c = document.createElement("canvas"); c.width = c.height = N;
+  const ctx = c.getContext("2d"), img = ctx.createImageData(N, N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const nx = (b[at(x - 1, y)] - b[at(x + 1, y)]) * strength, ny = (b[at(x, y - 1)] - b[at(x, y + 1)]) * strength;
+    const l = Math.hypot(nx, ny, 1), o = (y * N + x) * 4;
+    img.data[o] = (nx / l * 0.5 + 0.5) * 255; img.data[o + 1] = (ny / l * 0.5 + 0.5) * 255; img.data[o + 2] = (1 / l * 0.5 + 0.5) * 255; img.data[o + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+}
+const plushNormal = fabricNormal(256, 9000, 5, 1.6); plushNormal.repeat.set(4, 4);
+const feltNormal = fabricNormal(256, 6000, 7, 1.2); feltNormal.repeat.set(5, 4);
 const skyTex = canvasTex(512, 512, (c, w, h) => {
   const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#1f1745"); g.addColorStop(0.6, "#3b2a78"); g.addColorStop(1, "#6a4aa8");
   c.fillStyle = g; c.fillRect(0, 0, w, h);
@@ -124,16 +158,16 @@ const skyTex = canvasTex(512, 512, (c, w, h) => {
 });
 
 const mats = {
-  floor: new THREE.MeshLambertMaterial({ color: "#c9b3f2" }),
+  floor: new THREE.MeshPhysicalMaterial({ color: "#b9a2ea", roughness: 1, normalMap: feltNormal, normalScale: new THREE.Vector2(0.8, 0.8), sheen: 0.6, sheenColor: new THREE.Color("#efe4ff"), sheenRoughness: 0.8, envMapIntensity: 0.5 }),
   hole: new THREE.MeshBasicMaterial({ color: "#140d29" }),
   sky: new THREE.MeshBasicMaterial({ map: skyTex }),
   skySide: new THREE.MeshBasicMaterial({ map: skyTex, color: "#9d90c8" }),
-  plexi: new THREE.MeshPhongMaterial({ color: "#d8ecff", transparent: true, opacity: 0.22, depthWrite: false, shininess: 90 }),
-  trim: new THREE.MeshPhongMaterial({ color: "#ff8fc0", shininess: 60 }),
-  frame: new THREE.MeshPhongMaterial({ color: "#e07ab8", shininess: 40 }),
-  metal: new THREE.MeshPhongMaterial({ color: "#ddd8f5", specular: "#ffffff", shininess: 90 }),
-  metalDark: new THREE.MeshPhongMaterial({ color: "#8e86b8", specular: "#ffffff", shininess: 70 }),
-  tip: new THREE.MeshPhongMaterial({ color: "#ff6fa6", shininess: 80 }),
+  plexi: new THREE.MeshPhysicalMaterial({ color: "#e6f2ff", transparent: true, opacity: 0.12, depthWrite: false, roughness: 0.04, metalness: 0, envMapIntensity: 1.3 }),
+  trim: new THREE.MeshPhysicalMaterial({ color: "#ff86bb", roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.12 }),
+  frame: new THREE.MeshPhysicalMaterial({ color: "#d96aae", roughness: 0.42, clearcoat: 1, clearcoatRoughness: 0.15 }),
+  metal: new THREE.MeshStandardMaterial({ color: "#eceaf8", metalness: 1, roughness: 0.2 }),
+  metalDark: new THREE.MeshStandardMaterial({ color: "#a59dd0", metalness: 1, roughness: 0.32 }),
+  tip: new THREE.MeshStandardMaterial({ color: "#ff6fa6", roughness: 0.55 }),
   laser: new THREE.MeshBasicMaterial({ color: "#ff9cc2", transparent: true, opacity: 0.7, depthWrite: false }),
   ring: new THREE.MeshBasicMaterial({ color: "#7dffb0", transparent: true, opacity: 0.95, depthWrite: false, depthTest: false, side: THREE.DoubleSide })
 };
@@ -169,6 +203,22 @@ const carriage = box(0.2, 0.1, 0.2, mats.trim, 0, RAIL_Y - 0.08, 0);
 const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 6), mats.metal); scene.add(cable);
 const prizeSign = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(256, 110, (c, w) => { c.fillStyle = "rgba(255,255,255,.9)"; c.font = "800 60px 'Baloo 2', sans-serif"; c.textAlign = "center"; c.fillText("PRIZE ▼", w / 2, 80); }), transparent: true, depthWrite: false }));
 prizeSign.scale.set(0.5, 0.215, 1); prizeSign.position.set(HOME.x, CH_H + 0.2, HOME.z); scene.add(prizeSign);
+// front glass: just faint diagonal reflections, so the bin reads as behind glass; LED strip along the top
+{
+  const glassTex = canvasTex(256, 256, (c, w, h) => {
+    c.clearRect(0, 0, w, h);
+    [[0.12, 0.10, 0.22], [0.30, 0.045, 0.14], [0.70, 0.07, 0.12]].forEach(([x, bw, a]) => {
+      const g = c.createLinearGradient((x - bw) * w, 0, (x + bw) * w, 0);
+      g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.5, "rgba(255,255,255," + a + ")"); g.addColorStop(1, "rgba(255,255,255,0)");
+      c.save(); c.translate(w / 2, h / 2); c.rotate(-0.5); c.translate(-w / 2, -h / 2);
+      c.fillStyle = g; c.fillRect(-w, -h, w * 3, h * 3); c.restore();
+    });
+  });
+  const glass = new THREE.Mesh(new THREE.PlaneGeometry(BX1 - BX0, CEIL), new THREE.MeshBasicMaterial({ map: glassTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.55, toneMapped: false }));
+  glass.position.set(0, CEIL / 2, BZ1 + 0.02); glass.renderOrder = 10; scene.add(glass);
+  const led = box(BX1 - BX0, 0.03, 0.03, new THREE.MeshBasicMaterial({ color: "#ffd3ea", toneMapped: false }), 0, CEIL - 0.02, BZ1 - 0.02);
+  led.renderOrder = 1;
+}
 // aim laser and ring
 const laser = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 1, 8), mats.laser); scene.add(laser);
 const ring = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.095, 28), mats.ring); ring.rotation.x = -Math.PI / 2; scene.add(ring);
@@ -286,13 +336,13 @@ const MOODS = ["open", "happy", "wink"];
 function artCanvas(s, mood, isBack) {
   return new Promise((ok) => {
     let svg = window.squishSVG(s, mood).replace(SHADOW, "");
-    svg = svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" ');
+    svg = svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" ');
     const img = new Image();
     img.onload = () => {
-      const c = document.createElement("canvas"); c.width = c.height = 256;
-      const x = c.getContext("2d"); x.drawImage(img, 0, 0, 256, 256);
+      const c = document.createElement("canvas"); c.width = c.height = 512;
+      const x = c.getContext("2d"); x.drawImage(img, 0, 0, 512, 512);
       if (isBack) { // plain back: cover the face, add the little tag
-        x.save(); x.scale(1.28, 1.28);
+        x.save(); x.scale(2.56, 2.56);
         x.fillStyle = s.body; x.beginPath(); x.ellipse(100, 118, 60, 32, 0, 0, 7); x.fill();
         x.fillStyle = "#fff"; x.fillRect(140, 150, 13, 18); x.fillStyle = "#ff7fae"; x.fillRect(140, 150, 13, 5);
         x.restore();
@@ -304,20 +354,25 @@ function artCanvas(s, mood, isBack) {
   });
 }
 function texFrom(c) {
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy()); return t;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t;
 }
 async function makeLooks() {
   await Promise.all(SQ.map(async (s, i) => {
     const [f, b] = await Promise.all([artCanvas(s, MOODS[i % 3], false), artCanvas(s, "open", true)]);
-    looks[s.id] = {
-      front: new THREE.MeshLambertMaterial({ map: f ? texFrom(f) : null, color: f ? "#fff" : s.body, alphaTest: 0.5 }),
-      back: new THREE.MeshLambertMaterial({ map: b ? texFrom(b) : null, color: b ? "#fff" : s.body, alphaTest: 0.5 })
-    };
+    // plush: fully matte, fibre normals for fuzz, and a soft velvet sheen that lights up the edges like minky fabric
+    const plush = (c) => new THREE.MeshPhysicalMaterial({
+      map: c ? texFrom(c) : null, color: c ? "#fff" : s.body, alphaTest: 0.5,
+      roughness: 1, metalness: 0, envMapIntensity: 0.55,
+      normalMap: plushNormal, normalScale: new THREE.Vector2(0.55, 0.55),
+      sheen: 0.5, sheenRoughness: 0.5, sheenColor: new THREE.Color("#ffffff").lerp(new THREE.Color(s.body), 0.6)
+    });
+    const core = plush(null); core.color.set(s.body); core.alphaTest = 0;
+    looks[s.id] = { front: plush(f), back: plush(b), core };
   }));
 }
 // one shared puffy-pillow geometry: the squish art's body ellipse becomes a dome, ears and fins stay as thin flaps
 const pillow = (() => {
-  const g = new THREE.PlaneGeometry(1, 1, 34, 34), p = g.attributes.position;
+  const g = new THREE.PlaneGeometry(1, 1, 48, 48), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const sx = (p.getX(i) + 0.5) * 200, sy = (0.5 - p.getY(i)) * 200;
     const e = ((sx - 100) / 82) ** 2 + ((sy - 110) / 70) ** 2;
@@ -328,6 +383,7 @@ const pillow = (() => {
   return g;
 })();
 
+const coreGeo = new THREE.SphereGeometry(1, 28, 16);
 let squishes = [], uid = 0, bag = [];
 const pickMeshes = [];
 function nextSquish() {
@@ -356,6 +412,8 @@ function addSquish(x, y, z, forceId) {
   const g = new THREE.Group(), front = new THREE.Mesh(pillow, L.front), backM = new THREE.Mesh(pillow, L.back);
   backM.scale.z = -1;
   [front, backM].forEach((m) => { m.castShadow = true; m.receiveShadow = true; m.userData.sq = sq; g.add(m); pickMeshes.push(m); });
+  // solid body between the two halves, so a squish seen edge-on shows a soft seam instead of a see-through gap
+  const coreM = new THREE.Mesh(coreGeo, L.core); coreM.scale.set(0.47, 0.47, 0.16); coreM.position.y = 0.005; coreM.receiveShadow = true; g.add(coreM);
   g.scale.set(p.w, p.h, p.d);
   scene.add(g);
   sq.group = g; sq.meshes = [front, backM];
