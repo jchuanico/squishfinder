@@ -88,15 +88,39 @@ const el = {
   title: $("title"), over: $("over"), overText: $("overText"), overGot: $("overGot"), play: $("playBtn"), again: $("againBtn"),
   tokens: $("tokens"), caught: $("caught"), timer: $("timer"),
   left: $("leftBtn"), right: $("rightBtn"), up: $("upBtn"), down: $("downBtn"), drop: $("dropBtn"),
-  music: $("musicBtn"), sfx: $("sfxBtn"), pipBtn: $("pipBtn"), shelfGrid: $("shelfGrid"), shelfSub: $("shelfSub")
+  music: $("musicBtn"), sfx: $("sfxBtn"), pipBtn: $("pipBtn"), gfx: $("gfxBtn"), shelfGrid: $("shelfGrid"), shelfSub: $("shelfSub")
 };
+
+/* ================= graphics level =================
+   HD: velvet-sheen plush, clearcoat paint, soft shadows, full resolution.
+   Lite (default on phones and low-memory devices): matte plush with the same fibre texture but simpler lighting maths,
+   plain paint, smaller textures and shadow map, capped resolution. Looks close, costs far less GPU per pixel. */
+const LITE = (() => {
+  const saved = load("sf_claw3d_lite", null);
+  if (saved !== null) return !!saved;
+  const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  const small = Math.min(screen.width, screen.height) < 820;
+  return (coarse && small) || (navigator.deviceMemory && navigator.deviceMemory <= 4) || false;
+})();
+document.documentElement.classList.toggle("lite", LITE);
+const DROP_KEYS = ["sheen", "sheenColor", "sheenRoughness", "clearcoat", "clearcoatRoughness"];
+function physMat(p) {
+  if (!LITE) return new THREE.MeshPhysicalMaterial(p);
+  const q = Object.assign({}, p); DROP_KEYS.forEach((k) => delete q[k]);
+  return new THREE.MeshStandardMaterial(q);
+}
+function plushMat(p) { // squishes and felt: Lambert is matte by nature and much cheaper than PBR on phones
+  if (!LITE) return new THREE.MeshPhysicalMaterial(p);
+  const q = Object.assign({}, p); DROP_KEYS.concat(["roughness", "metalness", "envMapIntensity"]).forEach((k) => delete q[k]);
+  return new THREE.MeshLambertMaterial(q);
+}
 
 /* ================= three.js scene ================= */
 const renderer = new THREE.WebGLRenderer({ canvas: el.canvas, antialias: true });
-renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.setPixelRatio(Math.min(LITE ? 1.5 : 2, window.devicePixelRatio || 1));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = LITE ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
 renderer.shadowMap.autoUpdate = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
@@ -112,10 +136,11 @@ const cam = new THREE.PerspectiveCamera(40, 0.82, 0.1, 40);
 const sideCam = new THREE.PerspectiveCamera(36, 1.25, 0.1, 40);
 sideCam.position.set(3.4, 1.25, 0.05); sideCam.lookAt(0, 0.95, 0.05);
 
-scene.add(new THREE.HemisphereLight(0xfff4ff, 0x5a3f99, 0.55));
+// Lite's Lambert plush gets no light from the environment map, so its sky light makes up for it
+scene.add(new THREE.HemisphereLight(0xfff4ff, 0x5a3f99, LITE ? 1.25 : 0.55));
 const sun = new THREE.DirectionalLight(0xfff6ee, 1.5);
 sun.position.set(1.1, 5.5, 2.4); sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.mapSize.set(LITE ? 512 : 1024, LITE ? 512 : 1024);
 Object.assign(sun.shadow.camera, { left: -1.8, right: 1.8, top: 1.8, bottom: -1.8, near: 1, far: 10 });
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.02;
 scene.add(sun);
@@ -161,13 +186,13 @@ const skyTex = canvasTex(512, 512, (c, w, h) => {
 });
 
 const mats = {
-  floor: new THREE.MeshPhysicalMaterial({ color: "#b9a2ea", roughness: 1, normalMap: feltNormal, normalScale: new THREE.Vector2(0.8, 0.8), sheen: 0.6, sheenColor: new THREE.Color("#efe4ff"), sheenRoughness: 0.8, envMapIntensity: 0.5 }),
+  floor: plushMat({ color: "#b9a2ea", roughness: 1, normalMap: feltNormal, normalScale: new THREE.Vector2(0.8, 0.8), sheen: 0.6, sheenColor: new THREE.Color("#efe4ff"), sheenRoughness: 0.8, envMapIntensity: 0.5 }),
   hole: new THREE.MeshBasicMaterial({ color: "#140d29" }),
   sky: new THREE.MeshBasicMaterial({ map: skyTex }),
   skySide: new THREE.MeshBasicMaterial({ map: skyTex, color: "#9d90c8" }),
-  plexi: new THREE.MeshPhysicalMaterial({ color: "#e6f2ff", transparent: true, opacity: 0.12, depthWrite: false, roughness: 0.04, metalness: 0, envMapIntensity: 1.3 }),
-  trim: new THREE.MeshPhysicalMaterial({ color: "#ff86bb", roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.12 }),
-  frame: new THREE.MeshPhysicalMaterial({ color: "#d96aae", roughness: 0.42, clearcoat: 1, clearcoatRoughness: 0.15 }),
+  plexi: physMat({ color: "#e6f2ff", transparent: true, opacity: 0.12, depthWrite: false, roughness: 0.04, metalness: 0, envMapIntensity: 1.3 }),
+  trim: physMat({ color: "#ff86bb", roughness: 0.38, clearcoat: 1, clearcoatRoughness: 0.12 }),
+  frame: physMat({ color: "#d96aae", roughness: 0.42, clearcoat: 1, clearcoatRoughness: 0.15 }),
   metal: new THREE.MeshStandardMaterial({ color: "#eceaf8", metalness: 1, roughness: 0.2 }),
   metalDark: new THREE.MeshStandardMaterial({ color: "#a59dd0", metalness: 1, roughness: 0.32 }),
   tip: new THREE.MeshStandardMaterial({ color: "#ff6fa6", roughness: 0.55 }),
@@ -339,13 +364,14 @@ const MOODS = ["open", "happy", "wink"];
 function artCanvas(s, mood, isBack) {
   return new Promise((ok) => {
     let svg = window.squishSVG(s, mood).replace(SHADOW, "");
-    svg = svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" ');
+    const S = LITE ? 256 : 512;
+    svg = svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" width="' + S + '" height="' + S + '" ');
     const img = new Image();
     img.onload = () => {
-      const c = document.createElement("canvas"); c.width = c.height = 512;
-      const x = c.getContext("2d"); x.drawImage(img, 0, 0, 512, 512);
+      const c = document.createElement("canvas"); c.width = c.height = S;
+      const x = c.getContext("2d"); x.drawImage(img, 0, 0, S, S);
       if (isBack) { // plain back: cover the face, add the little tag
-        x.save(); x.scale(2.56, 2.56);
+        x.save(); x.scale(S / 200, S / 200);
         x.fillStyle = s.body; x.beginPath(); x.ellipse(100, 118, 60, 32, 0, 0, 7); x.fill();
         x.fillStyle = "#fff"; x.fillRect(140, 150, 13, 18); x.fillStyle = "#ff7fae"; x.fillRect(140, 150, 13, 5);
         x.restore();
@@ -363,7 +389,7 @@ async function makeLooks() {
   await Promise.all(SQ.map(async (s, i) => {
     const [f, b] = await Promise.all([artCanvas(s, MOODS[i % 3], false), artCanvas(s, "open", true)]);
     // plush: fully matte, fibre normals for fuzz, and a soft velvet sheen that lights up the edges like minky fabric
-    const plush = (c) => new THREE.MeshPhysicalMaterial({
+    const plush = (c) => plushMat({
       map: c ? texFrom(c) : null, color: c ? "#fff" : s.body, alphaTest: 0.5,
       roughness: 1, metalness: 0, envMapIntensity: 0.55,
       normalMap: plushNormal, normalScale: new THREE.Vector2(0.55, 0.55),
@@ -375,7 +401,7 @@ async function makeLooks() {
 }
 // one shared puffy-pillow geometry: the squish art's body ellipse becomes a dome, ears and fins stay as thin flaps
 const pillow = (() => {
-  const g = new THREE.PlaneGeometry(1, 1, 48, 48), p = g.attributes.position;
+  const seg = LITE ? 28 : 48, g = new THREE.PlaneGeometry(1, 1, seg, seg), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const sx = (p.getX(i) + 0.5) * 200, sy = (0.5 - p.getY(i)) * 200;
     const e = ((sx - 100) / 82) ** 2 + ((sy - 110) / 70) ** 2;
@@ -618,9 +644,23 @@ function afterStep(dt) {
     grip.sag = sag;
     if (!c.said.got && (c.state === "lift" || c.state === "carry") && p.y > 1.0) { c.said.got = true; pop("Got one!", hubTip(), "#fff"); Sound.grip(grip.off); }
     if (sag > T.slipDist) {
+      // the grip let go, but the closed prongs may still cradle it all the way to the chute, so don't call it lost yet
       const sq = grip.sq; dropGrip();
       arms.forEach((a) => { a.target = T.closed; });
-      if (!(p.x < CHX && p.z > CHZ)) { pop(c.state === "carry" ? "So close!" : "Oops!", sq.body.position, "#ffd166"); Sound.slip(); }
+      c.slipping = { sq, loose: 0, carry: c.state === "carry" };
+    }
+  }
+  // a slipping squish only counts as lost once it has really fallen away from the claw
+  if (c.slipping) {
+    const s = c.slipping, p = s.sq.body.position;
+    if (!squishes.includes(s.sq) || c.state === "release" || c.state === "ready" || c.state === "ending") c.slipping = null; // caught or turn over
+    else {
+      s.loose = contactInfo.touch.has(s.sq) ? 0 : s.loose + dt;
+      if (s.carry || c.state === "carry") s.carry = true;
+      if (hub.position.y - p.y > 0.95 || (s.loose > 0.35 && hub.position.y - p.y > 0.5)) {
+        if (!(p.x < CHX && p.z > CHZ)) { pop(s.carry ? "So close!" : "Oops!", p, "#ffd166"); Sound.slip(); }
+        c.slipping = null;
+      }
     }
   }
   // the prize chute: anything that drops out of the bottom on the chute side is caught
@@ -912,7 +952,14 @@ el.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
 el.play.addEventListener("click", startGame);
 el.again.addEventListener("click", startGame);
-function setToggle(btn, on, a, b) { btn.textContent = on ? a : b; btn.setAttribute("aria-pressed", on ? "true" : "false"); }
+function setToggle(btn, on, a, b) {
+  const t = on ? a : b, i = t.indexOf(" ");
+  btn.innerHTML = t.slice(0, i) + '<span class="lbl">' + t.slice(i) + "</span>";
+  btn.setAttribute("aria-pressed", on ? "true" : "false");
+}
+setToggle(el.gfx, LITE, "⚡ Lite", "✨ HD");
+// switching graphics rebuilds every material, so it reloads the page (the shelf is saved; the current game restarts)
+el.gfx.addEventListener("click", () => { save("sf_claw3d_lite", !LITE); location.reload(); });
 setToggle(el.music, Sound.musicOn(), "🎵 Music", "🔇 Music");
 setToggle(el.sfx, Sound.sfxOn(), "🔊 Sounds", "🔈 Sounds");
 setToggle(el.pipBtn, showPip, "👀 Side", "👀 Side");

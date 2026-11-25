@@ -22,6 +22,7 @@
   .chip{font:inherit;font-weight:700;font-size:.88rem;border:0;border-radius:999px;padding:3px 11px;background:var(--card);color:var(--ink);cursor:pointer}
   .chip[aria-pressed="false"]{opacity:.55}
   @media (max-width:420px){.logo{font-size:.92rem}.chip{font-size:.78rem;padding:3px 8px}.toggles{gap:4px}}
+  @media (max-width:520px){.chip .lbl{display:none}.chip{padding:4px 9px}}
   main{max-width:560px;margin:0 auto;padding:0 12px 24px}
   .machine{margin:0 auto;width:min(520px,100%,calc((100svh - 260px) * .78));min-width:min(280px,100%);
     background:linear-gradient(180deg,#ff8fbd,#c46ee0 55%,#7a4fd6);border-radius:26px;padding:8px 8px 10px;box-shadow:0 8px 0 rgba(0,0,0,.25)}
@@ -106,6 +107,7 @@
     <button class="chip" id="pipBtn" aria-pressed="true" title="Side view on/off">👀 Side</button>
     <button class="chip" id="musicBtn" aria-pressed="true" title="Music on/off">🎵 Music</button>
     <button class="chip" id="sfxBtn" aria-pressed="true" title="Sound effects on/off">🔊 Sounds</button>
+    <button class="chip" id="gfxBtn" aria-pressed="false" title="Graphics: HD or Lite (Lite runs smoother on phones)">✨ HD</button>
   </div>
 </header>
 <main>
