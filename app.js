@@ -196,6 +196,64 @@
     var q = encodeURIComponent("Squishmallows " + s.name + " plush");
     return "https://" + st.domain + "/s?k=" + q + (st.tag ? "&tag=" + encodeURIComponent(st.tag) : "");
   }
+  function storeKey(st) { return /\.ca$/.test(st.domain) ? "ca" : "com"; }
+  function buyLink(s, st, cls, label) {
+    return '<a class="' + cls + '" data-buy="' + storeKey(st) + '" data-id="' + s.id + '" target="_blank" rel="sponsored noopener" href="' + buyUrl(s, st) + '">' + label + "</a>";
+  }
+  // small shopping line under the best match, so people who stop at the results still see where to get it
+  function miniBuy(s) {
+    return '<p class="mini-buy">🛒 Get ' + s.name.split(" ")[0] + ": " + CONFIG.stores.map(function (st) {
+      return buyLink(s, st, "", st.flag + " " + st.name);
+    }).join(' <span aria-hidden="true">·</span> ') + "</p>";
+  }
+
+  /* ---------------- Christmas / wish list (kept on this device; shared as a link like /?wish=cam,glady) ---------------- */
+  var WISH_MAX = 8;
+  function listName() { var d = new Date(), m = d.getMonth(); return (m === 10 || (m === 11 && d.getDate() <= 25)) ? "Christmas list" : "wish list"; }
+  function wishes() { return (load("lm_wish", []) || []).filter(function (id) { return byId[id]; }); }
+  function wishUrl(list) { return location.origin + "/?wish=" + list.join(","); }
+  function wishBox(id) {
+    var list = wishes(), on = list.indexOf(id) > -1;
+    return '<div class="wish-box" id="wishBox"><button class="btn ' + (on ? "alt " : "") + 'wish" data-wish="' + id + '">' +
+      (on ? "✅ On my " + listName() :"📝 Add to my " + listName()) + "</button>" +
+      (list.length ? '<button class="btn alt wish" data-go="sendwish">💌 Send my list to a grown-up (' + list.length + ")</button>" : "") +
+      '<p class="note">' + (list.length ? "On your list: " + list.map(function (w) { return byId[w].name.split(" ")[0]; }).join(", ") + ". " : "") +
+      (on ? "Tap ✅ to take it off. " : "") + "Add your favorites, then send the list to a parent or grown-up.</p></div>";
+  }
+  function toggleWish(id) {
+    var list = wishes(), i = list.indexOf(id);
+    if (i > -1) list.splice(i, 1);
+    else {
+      if (list.length >= WISH_MAX) { toast("Your list is full (" + WISH_MAX + " squishes). Remove one first!"); return; }
+      list.push(id); track("wish_add");
+    }
+    save("lm_wish", list);
+    var box = document.getElementById("wishBox"); if (box) box.outerHTML = wishBox(id);
+    if (i < 0) toast("Added to your " + listName() + "! 🎄");
+  }
+  function sendWish() {
+    var list = wishes(); if (!list.length) return;
+    track("wish_send");
+    share("My Squishmallow " + listName() + " 🎄💗 These are the ones I'd love:", wishUrl(list));
+  }
+  // what the grown-up sees when they open the link
+  function wishPage(ids) {
+    var list = ids.filter(function (id, i) { return byId[id] && ids.indexOf(id) === i; }).slice(0, WISH_MAX);
+    if (!list.length) return home();
+    track("wish_open");
+    render('<div class="center wish-head"><span class="badge">🎄 A ' + listName() + ' was shared with you</span>' +
+        "<h2>Someone would love one of these!</h2>" +
+        '<p class="sub">These are the Squishmallows they picked on Squish Finder. Tap a store to see sizes and prices.</p></div>' +
+      '<div class="wish-list">' + list.map(function (id) {
+        var s = byId[id];
+        return '<div class="wish-item">' + squishSVG(s, "happy") + '<div><b>' + s.name + '</b><p class="note">' + s.squad + " · loves " + s.fav.toLowerCase() + "</p>" +
+          '<div class="buy-row">' + CONFIG.stores.map(function (st, k) { return buyLink(s, st, "btn buy" + (k ? " alt" : ""), st.flag + " " + st.name); }).join("") + "</div></div></div>";
+      }).join("") + "</div>" +
+      '<p class="tips"><b>🛍️ Gift tips:</b> Squishmallows come in several sizes, commonly 5", 8", 12", 16" and 24". 8" to 12" is a popular gift size; 16" and up are great for hugging. Check the size in the listing before you buy.</p>' +
+      '<div class="row"><button class="btn" data-go="start">Find a squish for yourself ✨</button></div>',
+      "?wish=" + list.join(","), "A Squishmallow " + listName() + " | Squish Finder");
+  }
+
   document.getElementById("disclosure").textContent = CONFIG.stores.some(function (st) { return st.tag; })
     ? "As an Amazon Associate we earn from qualifying purchases. Buying through our links supports this site at no extra cost to you."
     : "Shopping links may earn us a small commission at no extra cost to you.";
@@ -394,7 +452,8 @@
         return '<div class="card' + (i === 0 ? " top1" : "") + '" style="animation-delay:' + i * 0.1 + 's">' +
           (i === 0 ? '<span class="badge">Best match</span>' : "") + squishSVG(x.s, i === 0 ? "happy" : "open") +
           "<b>" + x.s.name + '</b><span class="match">' + Math.max(10, Math.round((x.score / maxPossible) * 100)) + "% match</span>" +
-          '<button class="btn pick" data-fav="' + x.s.id + '">This one! 💗</button></div>';
+          '<button class="btn pick" data-fav="' + x.s.id + '">This one! 💗</button>' +
+          (i === 0 ? miniBuy(x.s) : "") + "</div>";
       }).join("") + "</div>" +
       '<div class="center" style="margin-top:22px"><h2 style="font-size:1.3rem">Or pick another favorite</h2></div>' +
       grid(rest.map(function (x) { return x.s; })) +
@@ -423,9 +482,7 @@
       '<button class="btn alt share" data-share="' + s.id + '">📤 ' + (gift ? "Share this pick" : "Share my result") + "</button>" +
       (gift ? '<button class="btn alt share" data-go="invite">🎁 Send them the quiz</button>' : "") + "</div>";
     var buttons = CONFIG.stores.map(function (st, i) {
-      return '<a class="btn buy' + (i ? " alt" : "") + '" data-buy="' + (/\.ca$/.test(st.domain) ? "ca" : "com") + '" data-id="' + s.id +
-        '" target="_blank" rel="sponsored noopener" href="' + buyUrl(s, st) + '">' +
-        st.flag + " Buy on " + st.name + "</a>";
+      return buyLink(s, st, "btn buy" + (i ? " alt" : ""), st.flag + " Buy on " + st.name);
     }).join("");
     render((shared ? '<div class="center shared-cta"><p class="sub">Someone shared this squish with you! Which one are <b>you</b>?</p>' +
         '<button class="btn" data-go="start">Find yours ✨</button></div>' : "") +
@@ -437,6 +494,7 @@
       '<div><span class="badge">' + badge + '</span><h2>' + s.name + '</h2><p class="bio">' + s.bio + "</p>" +
       '<ul class="facts"><li>🏷️ <b>Squad:</b> ' + s.squad + "</li><li>💖 <b>Loves:</b> " + s.fav + "</li></ul>" +
       '<div class="buy-row">' + buttons + "</div>" +
+      (shared || gift ? "" : wishBox(s.id)) +
       '<p class="tips"><b>🛍️ Shopping tips:</b> Squishmallows come in several sizes, commonly 5", 8", 12", 16" and 24". Big ones are best for hugging, small ones for collecting. Check the size in the listing before you buy.</p>' +
       shareBtns +
       '<p class="note"><a href="/squishes/' + s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + '">📖 ' + s.name.split(" ")[0] + "'s full profile: rarity, editions & collector notes →</a></p>" +
@@ -580,6 +638,7 @@
       return;
     }
     if (t.dataset.fav) return detail(t.dataset.fav);
+    if (t.dataset.wish) return toggleWish(t.dataset.wish);
     if (t.dataset.card) return showCard(byId[t.dataset.card], mode === "gift");
     if (t.dataset.share) {
       track("share");
@@ -596,6 +655,7 @@
       case "back": if (step === 0) who(); else { step--; answers.length = step; question(); } break;
       case "all": all(); break;
       case "poll": poll(); break;
+      case "sendwish": sendWish(); break;
       case "invite": track("invite"); share("Take this quick quiz so I know which Squishmallow to get you 🎁", BASE); break;
     }
   });
@@ -607,16 +667,18 @@
 
   // a shared link (?s=wendy) opens that squish; anything else starts at home
   var sid = (location.search.match(/[?&]s=([a-z]+)/) || [])[1];
+  var wishIds = ((location.search.match(/[?&]wish=([a-z,]+)/) || [])[1] || "").split(",").filter(function (id) { return byId[id]; });
   // count one visit per browser session, with where it came from
   try {
     if (!sessionStorage.getItem("sf_v")) {
       sessionStorage.setItem("sf_v", "1");
-      var src = source(sid && byId[sid] ? sid : null);
+      var src = source((sid && byId[sid]) || wishIds.length ? "shared" : null);
       track(src ? ["visit", "src_" + src] : "visit");
     }
   } catch (e) {}
   // /?gift=1 (used by the gift guide) jumps straight into the gift quiz
-  if (sid && byId[sid]) detail(sid, true);
+  if (wishIds.length) wishPage(wishIds);
+  else if (sid && byId[sid]) detail(sid, true);
   else if (/[?&]gift=1/.test(location.search)) { mode = "gift"; step = 0; answers = []; track(["start", "start_gift"]); question(); }
   else home();
 })();

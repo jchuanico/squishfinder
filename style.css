@@ -52,6 +52,20 @@ p.sub{color:var(--soft);font-size:1.15rem;margin:.2em 0 1em}
 .btn.buy.alt{background:#fff3dc;box-shadow:0 5px 0 #f0cf96}
 .buy-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .buy-row .btn{flex:1 1 180px}
+.mini-buy{margin:10px 0 0;font-size:.95rem;font-weight:700;color:var(--soft);line-height:1.5}
+.mini-buy a{color:#b86e00;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.wish-box{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px}
+.wish-box .btn{flex:1 1 200px;font-size:1rem;padding:9px 16px;text-align:center;background:#2f9e6b;box-shadow:0 5px 0 #1f7a50}
+.wish-box .btn.alt{background:#eafaf1;color:#1f6e48;box-shadow:0 5px 0 #bfe8d2}
+.wish-box .note{flex-basis:100%;margin:2px 0 0}
+.wish-head .badge{display:inline-block;margin-bottom:6px}
+.wish-list{display:grid;gap:14px;max-width:640px;margin:0 auto}
+.wish-item{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center;background:var(--card);border-radius:24px;padding:12px 16px;box-shadow:var(--shadow)}
+.wish-item .squish{width:110px}
+.wish-item b{font-size:1.25rem}
+.wish-item .note{margin:0}
+.wish-item .buy-row .btn{flex:1 1 140px;font-size:.95rem;padding:8px 12px}
+@media (max-width:520px){.wish-item{grid-template-columns:80px 1fr;padding:10px 12px}.wish-item .squish{width:80px}}
 .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
 
 /* squish art */
