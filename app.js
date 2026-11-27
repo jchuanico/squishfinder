@@ -185,9 +185,11 @@
     var mouth = showMouth ? '<path d="M93 ' + my + ' q3.5 5 7 0 q3.5 5 7 0" stroke="' + ink + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' : "";
     if (mood === "happy" && showMouth) mouth = '<path d="M92 ' + my + ' q8 11 16 0Z" fill="#ff6b8f" stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"/>';
 
-    return '<svg class="squish ' + (cls || "") + '" viewBox="0 0 200 200" role="img" aria-label="' + s.name + ' illustration">' +
+    // Christmas accessories (Nov 27 - Dec 25, see data.js): antlers behind, hats/scarves/holly on top
+    var xmas = window.squishXmas ? window.squishXmas(s) : null;
+    return '<svg class="squish ' + (cls || "") + (xmas ? " xmas" : "") + '" viewBox="0 0 200 200" role="img" aria-label="' + s.name + ' illustration">' +
       '<ellipse cx="100" cy="186" rx="64" ry="8" fill="rgba(74,59,92,.13)"/>' +
-      back + body + belly + front + cheeks + eyes + mouth + "</svg>";
+      (xmas ? xmas.back : "") + back + body + belly + front + cheeks + eyes + mouth + (xmas ? xmas.front : "") + "</svg>";
   }
 
   /* ---------------- links ---------------- */

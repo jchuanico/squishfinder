@@ -137,3 +137,91 @@ window.QUESTIONS = [
     { t: "A buzzy little bug", e: "🐝", p: ["sunny"] },
     { t: "A dino or a legend", e: "🦖", p: ["danny", "benny"] } ] }
 ];
+
+/* ============ CHRISTMAS LOOK (Nov 27 - Dec 25) ============
+   window.squishXmas(s) -> { back, front } SVG bits in the 200x200 art space, or null when the season is off.
+   app.js adds them inside squishSVG; pages with pre-built art (squish pages, gift guide) get them on load below.
+   Each squish gets the accessory that fits its shape (ears, horns, fins, cones). ?xmas=1 / ?xmas=0 forces it. */
+(function () {
+  var on = (function () {
+    var m = /[?&]xmas=([01])/.exec(location.search);
+    if (m) return m[1] === "1";
+    var d = new Date(), mo = d.getMonth(), day = d.getDate();
+    return (mo === 10 && day >= 27) || (mo === 11 && day <= 25);
+  })();
+  window.XMAS = on;
+  var RED = "#e53b3b", WHITE = "#fffdf9", TRIM = "#e6dbe3", GREEN = "#2f9e5a", GREEN_D = "#24804a", BROWN = "#a8703f";
+  function g(x, y, sc, rot, inner) {
+    return '<g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + (sc || 1) + ')">' + inner + "</g>";
+  }
+  // Santa hat: brim centred on (x, y), floppy tip to the right with a pompom
+  function hat(x, y, sc, rot) {
+    return g(x, y, sc, rot,
+      '<path d="M-38 -2 C-36 -36 -14 -60 14 -62 C38 -63 54 -48 60 -26 C52 -31 44 -37 34 -39 C38 -27 38 -13 37 -2Z" fill="' + RED + '"/>' +
+      '<path d="M-22 -26 C-14 -42 0 -50 14 -53" stroke="#ff8a80" stroke-width="5" fill="none" stroke-linecap="round" opacity=".55"/>' +
+      '<rect x="-45" y="-11" width="90" height="19" rx="9.5" fill="' + WHITE + '" stroke="' + TRIM + '" stroke-width="2"/>' +
+      '<circle cx="60" cy="-25" r="10.5" fill="' + WHITE + '" stroke="' + TRIM + '" stroke-width="2"/>');
+  }
+  // knitted scarf around the lower body with a hanging tail and fringe
+  function scarf(c, c2) {
+    var fringe = "";
+    for (var i = 0; i < 4; i++) fringe += "M" + (138 + i * 5.5) + " " + (189 - i * 0.4) + " l0 5 ";
+    return '<path d="M21 140 Q100 170 179 140 L173 160 Q100 190 27 160Z" fill="' + c + '"/>' +
+      '<path d="M24 150 Q100 180 176 150" stroke="' + c2 + '" stroke-width="4.5" fill="none" stroke-dasharray="9 6" stroke-linecap="round"/>' +
+      '<path d="M130 166 L152 160 L159 188 L135 191Z" fill="' + c + '"/>' +
+      '<path d="M133 179 L156 174" stroke="' + c2 + '" stroke-width="4.5" stroke-linecap="round"/>' +
+      '<path d="' + fringe + '" stroke="' + c + '" stroke-width="3.5" stroke-linecap="round"/>';
+  }
+  // holly sprig: two leaves and three berries centred on (x, y)
+  function holly(x, y, sc, rot) {
+    var leaf = "M0 0 C5 -7 10 -5 14 -11 C16 -5 22 -5 26 -9 C26 -3 30 1 35 1 C29 6 27 10 21 12 C18 8 12 8 8 11 C8 5 4 2 0 0Z";
+    return g(x, y, sc, rot,
+      '<path d="' + leaf + '" fill="' + GREEN + '" transform="rotate(-14)"/><path d="' + leaf + '" fill="' + GREEN_D + '" transform="scale(-1 1) rotate(-14)"/>' +
+      '<path d="M3 -1 L30 -6 M-3 -1 L-30 -6" stroke="#1b6a3b" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<circle cx="-6" cy="4" r="6" fill="' + RED + '"/><circle cx="6" cy="4" r="6" fill="' + RED + '"/><circle cx="0" cy="-4" r="6.5" fill="#d92f35"/>' +
+      '<circle cx="-2" cy="-6.5" r="1.8" fill="#fff" opacity=".8"/>');
+  }
+  function antlers() {
+    var one = "M73 52 C67 38 62 26 58 10 M62 30 C54 28 46 22 42 12 M59 19 C64 15 68 10 70 4";
+    return '<g stroke="' + BROWN + '" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="' + one + '"/><path d="' + one + '" transform="translate(200 0) scale(-1 1)"/></g>';
+  }
+  var head = function () { return hat(100, 56, 0.78, -8); };
+  var LOOK = {
+    cam: { front: head }, connor: { front: head }, hans: { front: head }, benny: { front: function () { return hat(100, 54, 0.8, -8); } },
+    avery: { front: head }, sunny: { front: head }, simon: { front: head }, reginald: { front: head },
+    leonard: { front: function () { return hat(100, 52, 0.8, -8); } },
+    wendy: { front: function () { return hat(136, 34, 0.55, 14); } },
+    archie: { back: antlers, front: function () { return holly(100, 44, 0.75, 0); } },
+    noelani: { back: antlers, front: function () { return holly(100, 44, 0.75, 0); } },
+    fifi: { front: function () { return scarf(GREEN, WHITE); } },
+    winston: { front: function () { return scarf(RED, WHITE); } },
+    maui: { front: function () { return scarf(RED, WHITE); } },
+    lola: { front: function () { return scarf(GREEN, RED); } },
+    gordon: { front: function () { return scarf(RED, WHITE); } },
+    danny: { front: function () { return scarf(RED, WHITE); } },
+    claudia: { front: function () { return scarf(GREEN, WHITE); } },
+    olma: { front: function () { return scarf(GREEN, WHITE); } },
+    malcolm: { front: function () { return holly(142, 30, 1, 22); } },
+    stacy: { front: function () { return holly(148, 58, 0.9, 24); } },
+    marcella: { front: function () { return holly(138, 56, 0.9, 18); } },
+    glady: { front: function () { return holly(100, 44, 1, 0); } }
+  };
+  window.squishXmas = function (s) {
+    var L = on && s && LOOK[s.id];
+    return L ? { back: L.back ? L.back() : "", front: L.front ? L.front() : "" } : null;
+  };
+  // pre-built pages: decorate their art once the page has loaded
+  if (!on) return;
+  function decorate() {
+    var byName = {};
+    (window.SQUISHES || []).forEach(function (s) { byName[s.name + " illustration"] = s; });
+    [].forEach.call(document.querySelectorAll("svg.squish:not(.xmas)"), function (svg) {
+      var x = window.squishXmas(byName[svg.getAttribute("aria-label")]);
+      if (!x) return;
+      svg.classList.add("xmas");
+      if (x.back) svg.firstElementChild.insertAdjacentHTML("afterend", x.back);
+      svg.insertAdjacentHTML("beforeend", x.front);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", decorate); else decorate();
+})();
