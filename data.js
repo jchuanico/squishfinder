@@ -185,30 +185,29 @@ window.QUESTIONS = [
     var one = "M73 52 C67 38 62 26 58 10 M62 30 C54 28 46 22 42 12 M59 19 C64 15 68 10 70 4";
     return '<g stroke="' + BROWN + '" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="' + one + '"/><path d="' + one + '" transform="translate(200 0) scale(-1 1)"/></g>';
   }
-  var head = function () { return hat(100, 56, 0.78, -8); };
+  // kind + where it sits in the 200x200 art (x, y, scale, rotation in degrees); automation/coverstudio.html
+  // reads the same list through window.squishXmasLook(id) to build 3D versions for reel covers
+  var HAT = { kind: "hat", x: 100, y: 56, sc: 0.78, rot: -8 }, ANT = { kind: "antlers", x: 100, y: 44, sc: 0.75, rot: 0 };
   var LOOK = {
-    cam: { front: head }, connor: { front: head }, hans: { front: head }, benny: { front: function () { return hat(100, 54, 0.8, -8); } },
-    avery: { front: head }, sunny: { front: head }, simon: { front: head }, reginald: { front: head },
-    leonard: { front: function () { return hat(100, 52, 0.8, -8); } },
-    wendy: { front: function () { return hat(136, 34, 0.55, 14); } },
-    archie: { back: antlers, front: function () { return holly(100, 44, 0.75, 0); } },
-    noelani: { back: antlers, front: function () { return holly(100, 44, 0.75, 0); } },
-    fifi: { front: function () { return scarf(GREEN, WHITE); } },
-    winston: { front: function () { return scarf(RED, WHITE); } },
-    maui: { front: function () { return scarf(RED, WHITE); } },
-    lola: { front: function () { return scarf(GREEN, RED); } },
-    gordon: { front: function () { return scarf(RED, WHITE); } },
-    danny: { front: function () { return scarf(RED, WHITE); } },
-    claudia: { front: function () { return scarf(GREEN, WHITE); } },
-    olma: { front: function () { return scarf(GREEN, WHITE); } },
-    malcolm: { front: function () { return holly(142, 30, 1, 22); } },
-    stacy: { front: function () { return holly(148, 58, 0.9, 24); } },
-    marcella: { front: function () { return holly(138, 56, 0.9, 18); } },
-    glady: { front: function () { return holly(100, 44, 1, 0); } }
+    cam: HAT, connor: HAT, hans: HAT, avery: HAT, sunny: HAT, simon: HAT, reginald: HAT,
+    benny: { kind: "hat", x: 100, y: 54, sc: 0.8, rot: -8 }, leonard: { kind: "hat", x: 100, y: 52, sc: 0.8, rot: -8 },
+    wendy: { kind: "hat", x: 136, y: 34, sc: 0.55, rot: 14 },
+    archie: ANT, noelani: ANT,
+    fifi: { kind: "scarf", c: GREEN, c2: WHITE }, winston: { kind: "scarf", c: RED, c2: WHITE }, maui: { kind: "scarf", c: RED, c2: WHITE },
+    lola: { kind: "scarf", c: GREEN, c2: RED }, gordon: { kind: "scarf", c: RED, c2: WHITE }, danny: { kind: "scarf", c: RED, c2: WHITE },
+    claudia: { kind: "scarf", c: GREEN, c2: WHITE }, olma: { kind: "scarf", c: GREEN, c2: WHITE },
+    malcolm: { kind: "holly", x: 142, y: 30, sc: 1, rot: 22 }, stacy: { kind: "holly", x: 148, y: 58, sc: 0.9, rot: 24 },
+    marcella: { kind: "holly", x: 138, y: 56, sc: 0.9, rot: 18 }, glady: { kind: "holly", x: 100, y: 44, sc: 1, rot: 0 }
   };
+  window.squishXmasLook = function (id) { return on ? LOOK[id] || null : null; };
+  window.squishXmasHolly = holly;
   window.squishXmas = function (s) {
     var L = on && s && LOOK[s.id];
-    return L ? { back: L.back ? L.back() : "", front: L.front ? L.front() : "" } : null;
+    if (!L) return null;
+    if (L.kind === "hat") return { back: "", front: hat(L.x, L.y, L.sc, L.rot) };
+    if (L.kind === "scarf") return { back: "", front: scarf(L.c, L.c2) };
+    if (L.kind === "antlers") return { back: antlers(), front: holly(L.x, L.y, L.sc, L.rot) };
+    return { back: "", front: holly(L.x, L.y, L.sc, L.rot) };
   };
   // pre-built pages: decorate their art once the page has loaded
   if (!on) return;
